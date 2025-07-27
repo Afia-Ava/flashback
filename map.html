@@ -117,12 +117,13 @@
                   background: none;
                   border: none;
                   color: #d32f2f;
-                  font-size: 1em;
+                  font-size: 1.1em;
                   padding: 0.7em 1.2em;
                   width: 100%;
                   text-align: left;
                   cursor: pointer;
                   border-radius: 10px;
+                  font-family: 'Just Me Again Down Here', cursive;
                 "
               >
                 Log out
@@ -240,19 +241,22 @@
           const avatarImg = document.getElementById('sidebar-user-avatar');
           if (user) {
             nameSpan.textContent = user.displayName || user.email || 'User';
-            if (user.photoURL) {
-              avatarImg.src = user.photoURL;
-            } else {
-              const seed = encodeURIComponent(
-                user.displayName || user.email || 'ava'
-              );
-              avatarImg.src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
-            }
           } else {
             nameSpan.textContent = 'User';
+          }
+          var savedAvatar = localStorage.getItem('flashback_profile_avatar');
+          if (avatarImg && savedAvatar) {
+            avatarImg.src = savedAvatar;
+          } else if (avatarImg) {
             avatarImg.src =
               'https://api.dicebear.com/7.x/personas/svg?seed=ava';
           }
+        }
+        // Force sidebar avatar to always use saved avatar from localStorage on load
+        var sidebarAvatar = document.getElementById('sidebar-user-avatar');
+        var savedAvatar = localStorage.getItem('flashback_profile_avatar');
+        if (sidebarAvatar && savedAvatar) {
+          sidebarAvatar.src = savedAvatar;
         }
         function checkAuth() {
           if (window.firebase && firebase.auth) {

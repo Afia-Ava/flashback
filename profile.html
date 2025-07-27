@@ -101,9 +101,7 @@
                 display: none;
                 position: absolute;
                 right: 0;
-                top: auto;
-                bottom: 2.2em;
-                transform: translateY(-100%);
+                top: 2.2em;
                 background: #fff;
                 border: 1.5px solid #f89090;
                 border-radius: 10px;
@@ -112,24 +110,7 @@
               "
             >
               <button
-                onclick="window.location.href='settings.html'"
-                style="
-                  display: block;
-                  width: 100%;
-                  background: none;
-                  border: none;
-                  padding: 0.7em 1.2em;
-                  text-align: left;
-                  color: #f89090;
-                  font-family: 'Just Me Again Down Here', cursive;
-                  font-size: 1.1em;
-                  cursor: pointer;
-                "
-              >
-                Settings
-              </button>
-              <button
-                onclick="firebase.auth().signOut()"
+                id="logout-btn"
                 style="
                   display: block;
                   width: 100%;
@@ -261,6 +242,7 @@
       document.addEventListener('DOMContentLoaded', function () {
         var menuBtn = document.getElementById('sidebar-menu-btn');
         var menuDropdown = document.getElementById('sidebar-menu-dropdown');
+        var logoutBtn = document.getElementById('logout-btn');
         if (menuBtn && menuDropdown) {
           menuBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -271,6 +253,16 @@
             if (menuDropdown.style.display === 'block') {
               menuDropdown.style.display = 'none';
             }
+          });
+        }
+        if (logoutBtn && window.firebase && firebase.auth) {
+          logoutBtn.addEventListener('click', function () {
+            firebase
+              .auth()
+              .signOut()
+              .then(function () {
+                window.location.href = 'index.html';
+              });
           });
         }
       });

@@ -85,7 +85,19 @@
               &#8942;
             </button>
             <div id="sidebar-menu-dropdown" style="display: none; position: absolute; right: 0; top: 2.2em; background: #fff; border: 1.5px solid #f89090; border-radius: 10px; box-shadow: 0 2px 8px #f8909022; min-width: 120px;">
-              <button onclick="firebase.auth().signOut()" style="display: block; width: 100%; background: none; border: none; padding: 0.7em 1.2em; text-align: left; color: #f89090; font-family: 'Just Me Again Down Here', cursive; font-size: 1.1em; cursor: pointer;">Log out</button>
+              <button id="logout-btn" style="display: block; width: 100%; background: none; border: none; padding: 0.7em 1.2em; text-align: left; color: #f89090; font-family: 'Just Me Again Down Here', cursive; font-size: 1.1em; cursor: pointer;">Log out</button>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn && window.firebase && firebase.auth) {
+          logoutBtn.addEventListener('click', function () {
+            firebase.auth().signOut().then(function () {
+              window.location.href = 'index.html';
+            });
+          });
+        }
+      });
+    </script>
             </div>
           </div>
         </div>

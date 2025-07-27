@@ -110,24 +110,7 @@
               "
             >
               <button
-                onclick="window.location.href='settings.html'"
-                style="
-                  display: block;
-                  width: 100%;
-                  background: none;
-                  border: none;
-                  padding: 0.7em 1.2em;
-                  text-align: left;
-                  color: #f89090;
-                  font-family: 'Just Me Again Down Here', cursive;
-                  font-size: 1.1em;
-                  cursor: pointer;
-                "
-              >
-                Settings
-              </button>
-              <button
-                onclick="firebase.auth().signOut()"
+                id="logout-btn"
                 style="
                   display: block;
                   width: 100%;
@@ -526,6 +509,7 @@
       document.addEventListener('DOMContentLoaded', function () {
         var menuBtn = document.getElementById('sidebar-menu-btn');
         var menuDropdown = document.getElementById('sidebar-menu-dropdown');
+        var logoutBtn = document.getElementById('logout-btn');
         if (menuBtn && menuDropdown) {
           menuBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -535,6 +519,20 @@
           document.addEventListener('click', function (e) {
             if (menuDropdown.style.display === 'block') {
               menuDropdown.style.display = 'none';
+            }
+          });
+        }
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', function () {
+            if (window.firebase && firebase.auth) {
+              firebase
+                .auth()
+                .signOut()
+                .then(function () {
+                  window.location.href = 'index.html';
+                });
+            } else {
+              window.location.href = 'index.html';
             }
           });
         }
