@@ -450,19 +450,21 @@
           const avatarImg = document.getElementById('sidebar-user-avatar');
           if (user) {
             nameSpan.textContent = user.displayName || user.email || 'User';
-            if (user.photoURL) {
-              avatarImg.src = user.photoURL;
-            } else {
-              const seed = encodeURIComponent(
-                user.displayName || user.email || 'ava'
-              );
-              avatarImg.src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
-            }
           } else {
             nameSpan.textContent = 'User';
-            avatarImg.src =
-              'https://api.dicebear.com/7.x/personas/svg?seed=ava';
           }
+          var savedAvatar = localStorage.getItem('flashback_profile_avatar');
+          if (avatarImg && savedAvatar) {
+            avatarImg.src = savedAvatar;
+          } else if (avatarImg) {
+            avatarImg.src = 'https://api.dicebear.com/7.x/personas/svg?seed=ava';
+          }
+        }
+        // Force sidebar avatar to always use saved avatar from localStorage on load
+        var sidebarAvatar = document.getElementById('sidebar-user-avatar');
+        var savedAvatar = localStorage.getItem('flashback_profile_avatar');
+        if (sidebarAvatar && savedAvatar) {
+          sidebarAvatar.src = savedAvatar;
         }
         function checkAuth() {
           if (window.firebase && firebase.auth) {
