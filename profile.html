@@ -27,7 +27,13 @@
           >
             Map
           </button>
-          <button type="button" class="sidebar-menu-item">Drop a Pin</button>
+          <button
+            type="button"
+            class="sidebar-menu-item"
+            onclick="window.location.href='drop-pin.html'"
+          >
+            Drop a Pin
+          </button>
           <button type="button" class="sidebar-menu-item active">
             Profile
           </button>
@@ -39,6 +45,41 @@
             Settings
           </button>
         </nav>
+        <div style="flex: 1"></div>
+        <div
+          id="sidebar-user-profile"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 0.8em;
+            padding: 1.2em 1.2em 2.5em 1.2em;
+            margin-bottom: 1.5em;
+          "
+        >
+          <img
+            id="sidebar-user-avatar"
+            src="https://api.dicebear.com/7.x/personas/svg?seed=ava"
+            alt="User Avatar"
+            style="
+              width: 44px;
+              height: 44px;
+              border-radius: 50%;
+              border: 2.5px solid #f89090;
+              background: #fff;
+              object-fit: cover;
+            "
+          />
+          <span
+            id="sidebar-user-name"
+            style="
+              font-family: 'Just Me Again Down Here', cursive;
+              font-size: 1.3em;
+              color: #f89090;
+              font-weight: bold;
+            "
+            >User</span
+          >
+        </div>
       </aside>
       <section class="profile-green-full">
         <!-- Light green empty page, fills right side -->
@@ -47,5 +88,45 @@
     <footer>
       <a href="index.html">← Back to home</a>
     </footer>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+      // Show Firebase user info in sidebar
+      window.addEventListener('DOMContentLoaded', function () {
+        function setUserSidebar(user) {
+          const nameSpan = document.getElementById('sidebar-user-name');
+          const avatarImg = document.getElementById('sidebar-user-avatar');
+          if (user) {
+            nameSpan.textContent = user.displayName || user.email || 'User';
+            // Use Firebase photoURL or fallback to dicebear
+            if (user.photoURL) {
+              avatarImg.src = user.photoURL;
+            } else {
+              // Use dicebear with seed from email or name
+              const seed = encodeURIComponent(
+                user.displayName || user.email || 'ava'
+              );
+              avatarImg.src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
+            }
+          } else {
+            nameSpan.textContent = 'User';
+            avatarImg.src =
+              'https://api.dicebear.com/7.x/personas/svg?seed=ava';
+          }
+        }
+        function checkAuth() {
+          if (window.firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged(function (user) {
+              setUserSidebar(user);
+            });
+          } else {
+            setTimeout(checkAuth, 100);
+          }
+        }
+        checkAuth();
+      });
+    </script>
   </body>
 </html>
