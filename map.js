@@ -1,6 +1,6 @@
 window.onload = function () {
   if (document.getElementById('map')) {
-    const map = L.map('map').setView([20, 0], 2);
+    const map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
     L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
@@ -8,6 +8,7 @@ window.onload = function () {
           '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }
     ).addTo(map);
+    L.control.zoom({ position: 'topright' }).addTo(map);
     if (typeof L.Control.Geocoder !== 'undefined') {
       L.Control.geocoder({
         defaultMarkGeocode: true,
