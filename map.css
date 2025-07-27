@@ -90,7 +90,6 @@
   aspect-ratio: 1 / 1;
 }
 #mapPinBoxTopRight {
-  /* Make pin box more squarish */
   border-radius: 10px;
 }
 #mapPinBoxTopRight .pin-emoji {

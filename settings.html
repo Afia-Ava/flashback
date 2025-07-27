@@ -182,7 +182,14 @@
               margin-bottom: 1.2em;
             "
           >
-            <div style="position: relative">
+            <div
+              style="
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: 1.2em;
+              "
+            >
               <img
                 id="profile-avatar"
                 src="https://api.dicebear.com/7.x/personas/svg?seed=ava"
@@ -196,8 +203,9 @@
                   object-fit: cover;
                 "
               />
-              <label
-                for="profile-photo-upload"
+              <button
+                id="choose-avatar-btn"
+                type="button"
                 style="
                   position: absolute;
                   bottom: 0;
@@ -213,17 +221,184 @@
                   cursor: pointer;
                   border: 2px solid #fff;
                   font-size: 1.2em;
+                  padding: 0;
+                  border: 2px solid #fff;
                 "
               >
                 <span style="font-size: 1.2em">+</span>
-                <input
-                  id="profile-photo-upload"
-                  type="file"
-                  accept="image/*"
-                  style="display: none"
-                />
-              </label>
+              </button>
+              <div
+                id="avatar-choices"
+                style="
+                  display: none;
+                  position: absolute;
+                  top: 80px;
+                  left: 0;
+                  background: #fffbe7;
+                  border: 2px dashed #f89090;
+                  border-radius: 14px;
+                  box-shadow: 0 2px 8px #f8909022;
+                  padding: 1em 1.2em;
+                  z-index: 20;
+                  gap: 0.7em;
+                  flex-wrap: wrap;
+                  min-width: 220px;
+                "
+              >
+                <div style="display: flex; gap: 0.7em; flex-wrap: wrap">
+                  <img
+                    src="avatar/avatar1.jpg"
+                    class="avatar-choice"
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      border-radius: 50%;
+                      border: 2px solid #f89090;
+                      cursor: pointer;
+                      object-fit: cover;
+                    "
+                    alt="Avatar 1"
+                  />
+                  <img
+                    src="avatar/avatar2.jpg"
+                    class="avatar-choice"
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      border-radius: 50%;
+                      border: 2px solid #f89090;
+                      cursor: pointer;
+                      object-fit: cover;
+                    "
+                    alt="Avatar 2"
+                  />
+                  <img
+                    src="avatar/avatar3.jpg"
+                    class="avatar-choice"
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      border-radius: 50%;
+                      border: 2px solid #f89090;
+                      cursor: pointer;
+                      object-fit: cover;
+                    "
+                    alt="Avatar 3"
+                  />
+                  <img
+                    src="avatar/avatar4.jpg"
+                    class="avatar-choice"
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      border-radius: 50%;
+                      border: 2px solid #f89090;
+                      cursor: pointer;
+                      object-fit: cover;
+                    "
+                    alt="Avatar 4"
+                  />
+                  <img
+                    src="avatar/avatar5.jpg"
+                    class="avatar-choice"
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      border-radius: 50%;
+                      border: 2px solid #f89090;
+                      cursor: pointer;
+                      object-fit: cover;
+                    "
+                    alt="Avatar 5"
+                  />
+                  <img
+                    src="avatar/avatar6.jpg"
+                    class="avatar-choice"
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      border-radius: 50%;
+                      border: 2px solid #f89090;
+                      cursor: pointer;
+                      object-fit: cover;
+                    "
+                    alt="Avatar 6"
+                  />
+                </div>
+                <div style="width: 100%; text-align: right; margin-top: 0.5em">
+                  <button
+                    type="button"
+                    id="close-avatar-choices"
+                    style="
+                      background: none;
+                      border: none;
+                      color: #f89090;
+                      font-size: 1.1em;
+                      cursor: pointer;
+                      font-family: 'Just Me Again Down Here', cursive;
+                    "
+                  >
+                    close
+                  </button>
+                </div>
+              </div>
             </div>
+            <script>
+              document.addEventListener('DOMContentLoaded', function () {
+                var chooseBtn = document.getElementById('choose-avatar-btn');
+                var avatarChoices = document.getElementById('avatar-choices');
+                var profileAvatar = document.getElementById('profile-avatar');
+                var sidebarAvatar = document.getElementById(
+                  'sidebar-user-avatar'
+                );
+                var closeBtn = document.getElementById('close-avatar-choices');
+                if (chooseBtn && avatarChoices) {
+                  chooseBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    avatarChoices.style.display =
+                      avatarChoices.style.display === 'flex' ? 'none' : 'flex';
+                  });
+                }
+                if (closeBtn && avatarChoices) {
+                  closeBtn.addEventListener('click', function () {
+                    avatarChoices.style.display = 'none';
+                  });
+                }
+                avatarChoices
+                  .querySelectorAll('.avatar-choice')
+                  .forEach(function (img) {
+                    img.addEventListener('click', function () {
+                      var src = img.getAttribute('src');
+                      profileAvatar.src = src;
+                      if (sidebarAvatar) sidebarAvatar.src = src;
+                      localStorage.setItem('flashback_profile_avatar', src);
+                      avatarChoices.style.display = 'none';
+                    });
+                  });
+                var savedAvatar = localStorage.getItem(
+                  'flashback_profile_avatar'
+                );
+                if (savedAvatar) {
+                  profileAvatar.src = savedAvatar;
+                  if (sidebarAvatar) sidebarAvatar.src = savedAvatar;
+                } else {
+                  if (sidebarAvatar) sidebarAvatar.src = profileAvatar.src;
+                }
+                if (sidebarAvatar) {
+                  var saved = localStorage.getItem('flashback_profile_avatar');
+                  if (saved) sidebarAvatar.src = saved;
+                }
+                document.addEventListener('click', function (e) {
+                  if (
+                    avatarChoices.style.display === 'flex' &&
+                    !avatarChoices.contains(e.target) &&
+                    e.target !== chooseBtn
+                  ) {
+                    avatarChoices.style.display = 'none';
+                  }
+                });
+              });
+            </script>
           </div>
           <div
             style="
@@ -317,6 +492,7 @@
             </label>
           </div>
           <button
+            id="save-profile-btn"
             type="button"
             style="
               background: #f89090;
@@ -343,8 +519,10 @@
       <a href="index.html">← Back to home</a>
     </footer>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script>
-      // 3-dot menu logic
       document.addEventListener('DOMContentLoaded', function () {
         var menuBtn = document.getElementById('sidebar-menu-btn');
         var menuDropdown = document.getElementById('sidebar-menu-dropdown');
@@ -361,29 +539,65 @@
           });
         }
       });
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <script>
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var saveBtn = document.getElementById('save-profile-btn');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', async function () {
+            var name = document.getElementById('profile-name').value.trim();
+            var username = document
+              .getElementById('profile-username')
+              .value.trim();
+            var about = document.getElementById('profile-about').value.trim();
+            var location = document
+              .getElementById('profile-location')
+              .value.trim();
+            var photoURL = document.getElementById('profile-avatar').src;
+            if (!window.firebase || !firebase.auth().currentUser) {
+              alert('You must be logged in to save your profile.');
+              return;
+            }
+            var uid = firebase.auth().currentUser.uid;
+            try {
+              var db = window.firebase.firestore();
+              await db.collection('profileInfo').doc(uid).set(
+                {
+                  displayName: name,
+                  username: username,
+                  about: about,
+                  location: location,
+                  photoURL: photoURL,
+                },
+                { merge: true }
+              );
+              window.location.href = 'profile.html';
+            } catch (e) {
+              alert('Error saving profile: ' + e.message);
+            }
+          });
+        }
+      });
       function setUserSidebar(user) {
         const nameSpan = document.getElementById('sidebar-user-name');
         const avatarImg = document.getElementById('sidebar-user-avatar');
         if (user) {
           nameSpan.textContent = user.displayName || user.email || 'User';
-          if (user.photoURL) {
-            avatarImg.src = user.photoURL;
-          } else {
-            const seed = encodeURIComponent(
-              user.displayName || user.email || 'ava'
-            );
-            avatarImg.src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
-          }
         } else {
           nameSpan.textContent = 'User';
+        }
+        var savedAvatar = localStorage.getItem('flashback_profile_avatar');
+        if (avatarImg && savedAvatar) {
+          avatarImg.src = savedAvatar;
+        } else if (avatarImg) {
           avatarImg.src = 'https://api.dicebear.com/7.x/personas/svg?seed=ava';
         }
       }
       window.addEventListener('DOMContentLoaded', function () {
+        var sidebarAvatar = document.getElementById('sidebar-user-avatar');
+        var savedAvatar = localStorage.getItem('flashback_profile_avatar');
+        if (sidebarAvatar && savedAvatar) {
+          sidebarAvatar.src = savedAvatar;
+        }
         function checkAuth() {
           if (window.firebase && firebase.auth) {
             firebase.auth().onAuthStateChanged(function (user) {

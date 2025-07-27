@@ -75,13 +75,12 @@
         background: #68ab7a;
       }
       .signup-switch {
-        font-size: 1em;
+        font-size: 1.25em;
         margin-top: 0.5em;
         color: #f89090;
         font-family: 'Just Me Again Down Here', cursive;
       }
     </style>
-    <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
@@ -91,9 +90,9 @@
       <h2 class="login-title">Log In</h2>
       <form id="loginForm">
         <input
-          type="text"
+          type="email"
           id="loginUser"
-          placeholder="Username"
+          placeholder="Email"
           class="login-input"
           required
         />
@@ -131,9 +130,9 @@
           required
         />
         <input
-          type="text"
+          type="email"
           id="signupUser"
-          placeholder="Username"
+          placeholder="Email"
           class="login-input"
           required
         />
@@ -157,7 +156,6 @@
       </div>
     </div>
     <script>
-      // Login/Signup box switch logic
       const showSignup = document.getElementById('showSignup');
       const showLogin = document.getElementById('showLogin');
       const loginBox = document.querySelector('.login-signup-box');
@@ -174,7 +172,6 @@
           loginBox.style.display = 'flex';
         };
       }
-      // Firebase login logic
       const loginForm = document.getElementById('loginForm');
       if (loginForm) {
         loginForm.onsubmit = function (e) {
@@ -193,7 +190,6 @@
             });
         };
       }
-      // Firebase signup logic
       const signupForm = document.getElementById('signupForm');
       if (signupForm) {
         signupForm.onsubmit = function (e) {
@@ -205,7 +201,6 @@
             .auth()
             .createUserWithEmailAndPassword(email, password)
             .then(userCredential => {
-              // Optionally set display name
               return userCredential.user.updateProfile({ displayName: name });
             })
             .then(() => {

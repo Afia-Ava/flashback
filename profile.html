@@ -101,7 +101,9 @@
                 display: none;
                 position: absolute;
                 right: 0;
-                top: 2.2em;
+                top: auto;
+                bottom: 2.2em;
+                transform: translateY(-100%);
                 background: #fff;
                 border: 1.5px solid #f89090;
                 border-radius: 10px;
@@ -149,7 +151,12 @@
       </aside>
       <section
         class="profile-green-full"
-        style="position: relative; min-height: 100vh"
+        style="
+          position: relative;
+          min-height: 100vh;
+          max-height: 100vh;
+          overflow-y: auto;
+        "
       >
         <div
           style="
@@ -232,12 +239,13 @@
         <div
           id="profile-pins-list"
           style="
-            margin-top: 11em;
-            margin-left: 2.5em;
+            margin-top: 58em;
+            margin-left: 0em;
             max-width: 600px;
             display: flex;
             flex-direction: column;
             gap: 1.5em;
+            margin-bottom: 4em;
           "
         ></div>
       </section>
@@ -245,13 +253,11 @@
     <footer>
       <a href="index.html">← Back to home</a>
     </footer>
-    <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
-      // 3-dot menu logic
       document.addEventListener('DOMContentLoaded', function () {
         var menuBtn = document.getElementById('sidebar-menu-btn');
         var menuDropdown = document.getElementById('sidebar-menu-dropdown');
@@ -272,7 +278,6 @@
         if (!user) return;
         document.getElementById('profile-name').textContent =
           user.displayName || 'Name';
-        // Prefer custom username from Firestore, fallback to email prefix, then '@username'
         var username =
           user.username || (user.email ? user.email.split('@')[0] : 'username');
         document.getElementById('profile-username').textContent =
@@ -281,7 +286,6 @@
           user.location || 'Location';
         document.getElementById('profile-about').textContent =
           user.about || 'About you';
-        // Set sidebar real name
         var sidebarName = document.getElementById('sidebar-user-name');
         if (sidebarName)
           sidebarName.textContent = user.displayName || user.email || 'User';
@@ -322,7 +326,6 @@
           }
         }
         async function renderUserPins(user) {
-          // Fetch pins from Firestore where userId == user.uid
           const pinsList = document.getElementById('profile-pins-list');
           if (!pinsList) return;
           pinsList.innerHTML =
@@ -333,7 +336,6 @@
               .collection('pins')
               .where('userId', '==', user.uid)
               .get();
-            // Debug output
             console.log('[flashback] Current user.uid:', user.uid);
             console.log('[flashback] Pins found:', pinsSnap.size);
             if (pinsSnap.empty) {
@@ -382,33 +384,21 @@
                   localStorage.getItem('flashback_profile')
                 );
               } catch (e) {}
-              if (localProfile && localProfile.uid === user.uid) {
-                renderProfile({
-                  displayName: localProfile.displayName || user.displayName,
-                  email: user.email,
-                  photoURL: localProfile.photoURL || user.photoURL,
-                  username: localProfile.username,
-                  location: localProfile.location,
-                  about: localProfile.about,
-                });
-              } else {
-                // Fetch extra profile fields from Firestore
-                const db = firebase.firestore();
-                const userDoc = await db
-                  .collection('users')
-                  .doc(user.uid)
-                  .get();
-                const userData = userDoc.exists ? userDoc.data() : {};
-                renderProfile({
-                  displayName: user.displayName,
-                  email: user.email,
-                  photoURL: user.photoURL,
-                  username: userData.username,
-                  location: userData.location,
-                  about: userData.about,
-                });
-              }
-              // Render user's pins
+              // Always load from profileInfo collection for latest info
+              const db = firebase.firestore();
+              const userDoc = await db
+                .collection('profileInfo')
+                .doc(user.uid)
+                .get();
+              const userData = userDoc.exists ? userDoc.data() : {};
+              renderProfile({
+                displayName: userData.displayName || user.displayName,
+                email: user.email,
+                photoURL: userData.photoURL || user.photoURL,
+                username: userData.username,
+                location: userData.location,
+                about: userData.about,
+              });
               renderUserPins(user);
             });
           } else {

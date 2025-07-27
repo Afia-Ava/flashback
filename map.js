@@ -1,7 +1,7 @@
 window.onload = function () {
   if (document.getElementById('map')) {
     const map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
-    window.map = map; // Make map globally accessible for search
+    window.map = map;
     L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
@@ -9,26 +9,18 @@ window.onload = function () {
           '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }
     ).addTo(map);
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    if (typeof L.Control.Geocoder !== 'undefined') {
-      L.Control.geocoder({
-        defaultMarkGeocode: true,
-        placeholder: 'Search for a place...',
-      }).addTo(map);
-    }
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
     window.flashbackMap = map;
-    window.map = map; // Ensure global
+    window.map = map;
 
     if (window.firebase && firebase.firestore) {
       const db = firebase.firestore();
-      // Helper to add markers from a collection
       function addMarkersFromCollection(collectionName) {
         db.collection(collectionName)
           .get()
           .then(snapshot => {
             snapshot.forEach(doc => {
               const pin = doc.data();
-              // Try both lat/lng and latitude/longitude field names
               const lat = pin.lat ?? pin.latitude;
               const lng = pin.lng ?? pin.longitude;
               if (typeof lat === 'number' && typeof lng === 'number') {

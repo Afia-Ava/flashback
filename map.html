@@ -168,11 +168,9 @@
     <script src="firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
-      // Pin emoji click: go to drop-pin.html with lat/lng
       document.addEventListener('DOMContentLoaded', function () {
         var pinBtn = document.getElementById('mapPinBoxTopRight');
         var lastSearchedLatLng = null;
-        // Listen for search and store last searched location
         var mapSearchBtn = document.getElementById('mapSearchBtn');
         var mapSearchInput = document.getElementById('mapSearchInput');
         function getMapInstance() {
@@ -269,7 +267,6 @@
       });
     </script>
     <script>
-      // 3-dot menu logic
       const menuBtn = document.getElementById('sidebar-user-menu-btn');
       const menu = document.getElementById('sidebar-user-menu');
       if (menuBtn && menu) {
@@ -285,7 +282,6 @@
           e.stopPropagation();
         });
       }
-      // Logout logic
       const logoutBtn = document.getElementById('sidebar-logout-btn');
       if (logoutBtn) {
         logoutBtn.onclick = function () {
@@ -300,8 +296,6 @@
         };
       }
     </script>
-    <script>
-      // (Replaced by above logic)
-    </script>
+    <script></script>
   </body>
 </html>

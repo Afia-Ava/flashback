@@ -17,11 +17,29 @@
         width: 100vw;
         height: 100vh;
         background: #e6f7e6;
-        /* light green shade */
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
+        position: relative;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        background-image: linear-gradient(
+            to right,
+            #d2e6d2 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, #d2e6d2 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.35;
+        z-index: 0;
       }
     </style>
   </head>
@@ -56,11 +74,9 @@
         href="login.html"
         style="
           position: absolute;
-          left: 25vw;
-          top: 42vh;
-          transform: translateY(
-            90px
-          ); /* visually below the green box, slightly left and up */
+          left: calc(22vw + 1.3cm);
+          top: 39vh;
+          transform: translateY(60px); /* centered in green box, nudged right */
           background: #e6f7e6;
           border: 2.5px solid #f89090;
           border-radius: 18px;
@@ -75,8 +91,8 @@
           z-index: 20;
           transition: background 0.18s, box-shadow 0.18s, transform 0.1s;
         "
-        onmouseover="this.style.background='#fdf6e3';this.style.transform='translateY(85px) scale(1.04)';"
-        onmouseout="this.style.background='#e6f7e6';this.style.transform='translateY(90px)';"
+        onmouseover="this.style.background='#fdf6e3';this.style.transform='translateY(55px) scale(1.04)';"
+        onmouseout="this.style.background='#e6f7e6';this.style.transform='translateY(60px)';"
         >join</a
       >
     </div>

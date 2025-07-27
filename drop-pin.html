@@ -85,7 +85,6 @@
               &#8942;
             </button>
             <div id="sidebar-menu-dropdown" style="display: none; position: absolute; right: 0; top: 2.2em; background: #fff; border: 1.5px solid #f89090; border-radius: 10px; box-shadow: 0 2px 8px #f8909022; min-width: 120px;">
-              <button onclick="window.location.href='settings.html'" style="display: block; width: 100%; background: none; border: none; padding: 0.7em 1.2em; text-align: left; color: #f89090; font-family: 'Just Me Again Down Here', cursive; font-size: 1.1em; cursor: pointer;">Settings</button>
               <button onclick="firebase.auth().signOut()" style="display: block; width: 100%; background: none; border: none; padding: 0.7em 1.2em; text-align: left; color: #f89090; font-family: 'Just Me Again Down Here', cursive; font-size: 1.1em; cursor: pointer;">Log out</button>
             </div>
           </div>
@@ -125,6 +124,11 @@
             placeholder="Place Name"
             required
           />
+        <!-- Map selection hint absolutely positioned on the right side of the green section -->
+        <div style="position: absolute; top: 3.5em; right: 3.5em; max-width: 260px; background: #fffbe7; border: 2px dashed #68ab7a; border-radius: 14px; padding: 1.1em 1.3em; box-shadow: 0 2px 8px #68ab7a22; color: #68ab7a; font-family: 'Just Me Again Down Here', cursive; font-size: 1.13em; z-index: 10;">
+          <span style="font-size:1.3em;vertical-align:middle;">🗺️</span>
+          <span style="margin-left:0.3em;">Select a location on the map and click the <span style='font-size:1.2em;vertical-align:middle;'>📍</span> at the top right!</span>
+        </div>
           <textarea
             class="cute-input"
             placeholder="Memory"
@@ -298,7 +302,6 @@
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script>
-      // 3-dot menu logic
       document.addEventListener('DOMContentLoaded', function () {
         var menuBtn = document.getElementById('sidebar-menu-btn');
         var menuDropdown = document.getElementById('sidebar-menu-dropdown');
@@ -316,7 +319,6 @@
       });
     </script>
     <script>
-      // Autofill place name from lat/lng in URL
       window.addEventListener('DOMContentLoaded', function () {
         function getParam(name) {
           const url = new URL(window.location.href);
@@ -325,7 +327,6 @@
         const lat = getParam('lat');
         const lng = getParam('lng');
         if (lat && lng) {
-          // Reverse geocode using Nominatim
           fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`)
             .then(r => r.json())
             .then(data => {
@@ -338,7 +339,6 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
-    <!-- Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
@@ -352,7 +352,6 @@
               'textarea[placeholder="Memory"]'
             ).value;
             var date = form.querySelector('input[type="date"]').value;
-            // Always use lat/lng from URL if present
             function getParam(name) {
               const url = new URL(window.location.href);
               return url.searchParams.get(name);
@@ -395,7 +394,6 @@
             };
             if (window.firebase && firebase.firestore) {
               const db = firebase.firestore();
-              // Save to both collections for compatibility
               Promise.all([
                 db.collection('memoryPins').add(pin),
                 db.collection('pins').add(pin)

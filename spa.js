@@ -1,6 +1,3 @@
-// spa.js - Handles sidebar navigation and dynamic content swapping
-
-// HTML for each page's right-side content
 const pages = {
   map: `
     <div class="map-search-bar">
@@ -29,7 +26,6 @@ function setActivePage(page) {
   const mainContent = document.getElementById('main-content');
   mainContent.innerHTML = pages[page] || '';
   if (page === 'map') {
-    // Only load map.js if on map page
     if (!window.flashbackMap) {
       const script = document.createElement('script');
       script.src = 'map.js';
@@ -39,7 +35,6 @@ function setActivePage(page) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Default to map page
   setActivePage('map');
   document.querySelectorAll('.sidebar-menu-item').forEach(btn => {
     btn.addEventListener('click', () => {
