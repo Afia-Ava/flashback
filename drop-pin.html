@@ -19,7 +19,7 @@
           style="text-decoration: none; color: #f89090"
           >flashback</a
         >
-        <nav class="sidebar-menu" style="margin-top: 1.5em">
+        <nav class="sidebar-menu" style="margin-top: 1.5em; position: relative;">
           <button
             type="button"
             class="sidebar-menu-item"
@@ -54,6 +54,7 @@
             gap: 0.8em;
             padding: 1.2em 1.2em 2.5em 1.2em;
             margin-bottom: 1.5em;
+            position: relative;
           "
         >
           <img
@@ -76,9 +77,18 @@
               font-size: 1.3em;
               color: #f89090;
               font-weight: bold;
+              margin-right: 0.5em;
             "
-            >User</span
-          >
+          >User</span>
+          <div style="position: relative; margin-left: auto;">
+            <button id="sidebar-menu-btn" style="background: none; border: none; cursor: pointer; font-size: 1.5em; color: #f89090; padding: 0 0.2em;">
+              &#8942;
+            </button>
+            <div id="sidebar-menu-dropdown" style="display: none; position: absolute; right: 0; top: 2.2em; background: #fff; border: 1.5px solid #f89090; border-radius: 10px; box-shadow: 0 2px 8px #f8909022; min-width: 120px;">
+              <button onclick="window.location.href='settings.html'" style="display: block; width: 100%; background: none; border: none; padding: 0.7em 1.2em; text-align: left; color: #f89090; font-family: 'Just Me Again Down Here', cursive; font-size: 1.1em; cursor: pointer;">Settings</button>
+              <button onclick="firebase.auth().signOut()" style="display: block; width: 100%; background: none; border: none; padding: 0.7em 1.2em; text-align: left; color: #f89090; font-family: 'Just Me Again Down Here', cursive; font-size: 1.1em; cursor: pointer;">Log out</button>
+            </div>
+          </div>
         </div>
       </aside>
       <section
@@ -287,6 +297,45 @@
       }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script>
+      // 3-dot menu logic
+      document.addEventListener('DOMContentLoaded', function () {
+        var menuBtn = document.getElementById('sidebar-menu-btn');
+        var menuDropdown = document.getElementById('sidebar-menu-dropdown');
+        if (menuBtn && menuDropdown) {
+          menuBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            menuDropdown.style.display = menuDropdown.style.display === 'block' ? 'none' : 'block';
+          });
+          document.addEventListener('click', function (e) {
+            if (menuDropdown.style.display === 'block') {
+              menuDropdown.style.display = 'none';
+            }
+          });
+        }
+      });
+    </script>
+    <script>
+      // Autofill place name from lat/lng in URL
+      window.addEventListener('DOMContentLoaded', function () {
+        function getParam(name) {
+          const url = new URL(window.location.href);
+          return url.searchParams.get(name);
+        }
+        const lat = getParam('lat');
+        const lng = getParam('lng');
+        if (lat && lng) {
+          // Reverse geocode using Nominatim
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`)
+            .then(r => r.json())
+            .then(data => {
+              const place = data.display_name || data.name || '';
+              const placeInput = document.getElementById('place-name-input');
+              if (placeInput && place) placeInput.value = place;
+            });
+        }
+      });
+    </script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
     <!-- Firestore -->
@@ -303,9 +352,17 @@
               'textarea[placeholder="Memory"]'
             ).value;
             var date = form.querySelector('input[type="date"]').value;
-            var lat = null,
-              lng = null;
-            if (
+            // Always use lat/lng from URL if present
+            function getParam(name) {
+              const url = new URL(window.location.href);
+              return url.searchParams.get(name);
+            }
+            var lat = getParam('lat');
+            var lng = getParam('lng');
+            if (lat && lng) {
+              lat = parseFloat(lat);
+              lng = parseFloat(lng);
+            } else if (
               localStorage.getItem('flashback_lat') &&
               localStorage.getItem('flashback_lng')
             ) {
@@ -338,8 +395,11 @@
             };
             if (window.firebase && firebase.firestore) {
               const db = firebase.firestore();
-              db.collection('memoryPins')
-                .add(pin)
+              // Save to both collections for compatibility
+              Promise.all([
+                db.collection('memoryPins').add(pin),
+                db.collection('pins').add(pin)
+              ])
                 .then(function () {
                   localStorage.removeItem('flashback_lat');
                   localStorage.removeItem('flashback_lng');

@@ -19,7 +19,7 @@
           style="text-decoration: none; color: #f89090"
           >flashback</a
         >
-        <nav class="sidebar-menu" style="margin-top: 1.5em">
+        <nav class="sidebar-menu" style="margin-top: 1.5em; position: relative">
           <button
             type="button"
             class="sidebar-menu-item"
@@ -54,6 +54,7 @@
             gap: 0.8em;
             padding: 1.2em 1.2em 2.5em 1.2em;
             margin-bottom: 1.5em;
+            position: relative;
           "
         >
           <img
@@ -76,13 +77,169 @@
               font-size: 1.3em;
               color: #f89090;
               font-weight: bold;
+              margin-right: 0.5em;
             "
             >User</span
           >
+          <div style="position: relative; margin-left: auto">
+            <button
+              id="sidebar-menu-btn"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 1.5em;
+                color: #f89090;
+                padding: 0 0.2em;
+              "
+            >
+              &#8942;
+            </button>
+            <div
+              id="sidebar-menu-dropdown"
+              style="
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 2.2em;
+                background: #fff;
+                border: 1.5px solid #f89090;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px #f8909022;
+                min-width: 120px;
+              "
+            >
+              <button
+                onclick="window.location.href='settings.html'"
+                style="
+                  display: block;
+                  width: 100%;
+                  background: none;
+                  border: none;
+                  padding: 0.7em 1.2em;
+                  text-align: left;
+                  color: #f89090;
+                  font-family: 'Just Me Again Down Here', cursive;
+                  font-size: 1.1em;
+                  cursor: pointer;
+                "
+              >
+                Settings
+              </button>
+              <button
+                onclick="firebase.auth().signOut()"
+                style="
+                  display: block;
+                  width: 100%;
+                  background: none;
+                  border: none;
+                  padding: 0.7em 1.2em;
+                  text-align: left;
+                  color: #f89090;
+                  font-family: 'Just Me Again Down Here', cursive;
+                  font-size: 1.1em;
+                  cursor: pointer;
+                "
+              >
+                Log out
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
-      <section class="profile-green-full">
-        <!-- Light green empty page, fills right side -->
+      <section
+        class="profile-green-full"
+        style="position: relative; min-height: 100vh"
+      >
+        <div
+          style="
+            position: absolute;
+            top: 2.5em;
+            left: 2.5em;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.2em;
+            min-width: 340px;
+            max-width: 420px;
+            background: none;
+            margin: 0;
+            padding: 0;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 1.2em">
+            <img
+              id="profile-avatar"
+              src="https://api.dicebear.com/7.x/personas/svg?seed=ava"
+              alt="Profile Picture"
+              style="
+                width: 74px;
+                height: 74px;
+                border-radius: 50%;
+                border: 3px solid #4caf50;
+                background: #fff;
+                object-fit: cover;
+              "
+            />
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 0.3em;
+                align-items: flex-start;
+              "
+            >
+              <span
+                id="profile-name"
+                style="
+                  font-size: 1.3em;
+                  color: #7a5c2e;
+                  font-family: 'Just Me Again Down Here', cursive;
+                  font-weight: bold;
+                "
+                >Name</span
+              >
+              <span
+                id="profile-username"
+                style="
+                  font-size: 1.1em;
+                  color: #a67c52;
+                  font-family: 'Just Me Again Down Here', cursive;
+                "
+                >@username</span
+              >
+              <span
+                id="profile-about"
+                style="
+                  font-size: 1.05em;
+                  color: #7a5c2e;
+                  font-family: 'Just Me Again Down Here', cursive;
+                "
+                >About you</span
+              >
+              <span
+                id="profile-location"
+                style="
+                  font-size: 1em;
+                  color: #7a5c2e;
+                  font-family: 'Just Me Again Down Here', cursive;
+                "
+                >Location</span
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          id="profile-pins-list"
+          style="
+            margin-top: 11em;
+            margin-left: 2.5em;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5em;
+          "
+        ></div>
       </section>
     </main>
     <footer>
@@ -92,19 +249,67 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
-      // Show Firebase user info in sidebar
+      // 3-dot menu logic
+      document.addEventListener('DOMContentLoaded', function () {
+        var menuBtn = document.getElementById('sidebar-menu-btn');
+        var menuDropdown = document.getElementById('sidebar-menu-dropdown');
+        if (menuBtn && menuDropdown) {
+          menuBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            menuDropdown.style.display =
+              menuDropdown.style.display === 'block' ? 'none' : 'block';
+          });
+          document.addEventListener('click', function (e) {
+            if (menuDropdown.style.display === 'block') {
+              menuDropdown.style.display = 'none';
+            }
+          });
+        }
+      });
+      function renderProfile(user) {
+        if (!user) return;
+        document.getElementById('profile-name').textContent =
+          user.displayName || 'Name';
+        // Prefer custom username from Firestore, fallback to email prefix, then '@username'
+        var username =
+          user.username || (user.email ? user.email.split('@')[0] : 'username');
+        document.getElementById('profile-username').textContent =
+          '@' + username;
+        document.getElementById('profile-location').textContent =
+          user.location || 'Location';
+        document.getElementById('profile-about').textContent =
+          user.about || 'About you';
+        // Set sidebar real name
+        var sidebarName = document.getElementById('sidebar-user-name');
+        if (sidebarName)
+          sidebarName.textContent = user.displayName || user.email || 'User';
+        if (user.photoURL) {
+          document.getElementById('profile-avatar').src = user.photoURL;
+          var sidebarAvatar = document.getElementById('sidebar-user-avatar');
+          if (sidebarAvatar) sidebarAvatar.src = user.photoURL;
+        } else {
+          const seed = encodeURIComponent(
+            user.displayName || user.email || 'ava'
+          );
+          document.getElementById(
+            'profile-avatar'
+          ).src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
+          var sidebarAvatar = document.getElementById('sidebar-user-avatar');
+          if (sidebarAvatar)
+            sidebarAvatar.src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
+        }
+      }
       window.addEventListener('DOMContentLoaded', function () {
         function setUserSidebar(user) {
           const nameSpan = document.getElementById('sidebar-user-name');
           const avatarImg = document.getElementById('sidebar-user-avatar');
           if (user) {
             nameSpan.textContent = user.displayName || user.email || 'User';
-            // Use Firebase photoURL or fallback to dicebear
             if (user.photoURL) {
               avatarImg.src = user.photoURL;
             } else {
-              // Use dicebear with seed from email or name
               const seed = encodeURIComponent(
                 user.displayName || user.email || 'ava'
               );
@@ -116,10 +321,95 @@
               'https://api.dicebear.com/7.x/personas/svg?seed=ava';
           }
         }
+        async function renderUserPins(user) {
+          // Fetch pins from Firestore where userId == user.uid
+          const pinsList = document.getElementById('profile-pins-list');
+          if (!pinsList) return;
+          pinsList.innerHTML =
+            '<span style="color:#7a5c2e;font-family:Just Me Again Down Here,cursive;font-size:1.2em;">Loading your pins...</span>';
+          try {
+            const db = firebase.firestore();
+            const pinsSnap = await db
+              .collection('pins')
+              .where('userId', '==', user.uid)
+              .get();
+            // Debug output
+            console.log('[flashback] Current user.uid:', user.uid);
+            console.log('[flashback] Pins found:', pinsSnap.size);
+            if (pinsSnap.empty) {
+              pinsList.innerHTML =
+                '<span style="color:#7a5c2e;font-family:Just Me Again Down Here,cursive;font-size:1.1em;">No pins yet. Drop a pin on the map!</span>';
+              return;
+            }
+            let html = '';
+            pinsSnap.forEach(doc => {
+              const pin = doc.data();
+              html += `<div class="scrapbook-border" style="background:#fffbe7;padding:1.2em 1.5em 1.2em 1.2em;border-radius:18px;box-shadow:0 2px 8px #7a5c2e22;display:flex;gap:1.2em;align-items:flex-start;">
+                ${
+                  pin.photoURL
+                    ? `<img src="${pin.photoURL}" alt="Pin photo" style="width:70px;height:70px;object-fit:cover;border-radius:12px;border:2px solid #f89090;background:#fff;">`
+                    : ''
+                }
+                <div style="display:flex;flex-direction:column;gap:0.3em;">
+                  <span style="font-family:'Just Me Again Down Here',cursive;font-size:1.15em;color:#f89090;font-weight:bold;">${
+                    pin.title || 'Untitled Pin'
+                  }</span>
+                  <span style="font-family:'Just Me Again Down Here',cursive;font-size:1em;color:#7a5c2e;">${
+                    pin.place || ''
+                  }</span>
+                  <span style="font-family:'Just Me Again Down Here',cursive;font-size:1em;color:#a67c52;">${
+                    pin.memory ? pin.memory : ''
+                  }</span>
+                  <span style="font-family:'Just Me Again Down Here',cursive;font-size:0.95em;color:#a67c52;">${
+                    pin.date ? 'Date: ' + pin.date : ''
+                  }</span>
+                </div>
+              </div>`;
+            });
+            pinsList.innerHTML = html;
+          } catch (e) {
+            pinsList.innerHTML = `<span style=\"color:#f00;\">Error loading pins: ${e.message}</span>`;
+          }
+        }
         function checkAuth() {
           if (window.firebase && firebase.auth) {
-            firebase.auth().onAuthStateChanged(function (user) {
+            firebase.auth().onAuthStateChanged(async function (user) {
               setUserSidebar(user);
+              if (!user) return;
+              let localProfile = null;
+              try {
+                localProfile = JSON.parse(
+                  localStorage.getItem('flashback_profile')
+                );
+              } catch (e) {}
+              if (localProfile && localProfile.uid === user.uid) {
+                renderProfile({
+                  displayName: localProfile.displayName || user.displayName,
+                  email: user.email,
+                  photoURL: localProfile.photoURL || user.photoURL,
+                  username: localProfile.username,
+                  location: localProfile.location,
+                  about: localProfile.about,
+                });
+              } else {
+                // Fetch extra profile fields from Firestore
+                const db = firebase.firestore();
+                const userDoc = await db
+                  .collection('users')
+                  .doc(user.uid)
+                  .get();
+                const userData = userDoc.exists ? userDoc.data() : {};
+                renderProfile({
+                  displayName: user.displayName,
+                  email: user.email,
+                  photoURL: user.photoURL,
+                  username: userData.username,
+                  location: userData.location,
+                  about: userData.about,
+                });
+              }
+              // Render user's pins
+              renderUserPins(user);
             });
           } else {
             setTimeout(checkAuth, 100);

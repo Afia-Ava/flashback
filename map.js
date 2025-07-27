@@ -1,6 +1,7 @@
 window.onload = function () {
   if (document.getElementById('map')) {
     const map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
+    window.map = map; // Make map globally accessible for search
     L.tileLayer(
       'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
@@ -16,24 +17,33 @@ window.onload = function () {
       }).addTo(map);
     }
     window.flashbackMap = map;
+    window.map = map; // Ensure global
 
     if (window.firebase && firebase.firestore) {
       const db = firebase.firestore();
-      db.collection('memoryPins')
-        .get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            const pin = doc.data();
-            if (typeof pin.lat === 'number' && typeof pin.lng === 'number') {
-              const marker = L.marker([pin.lat, pin.lng]).addTo(map);
-              marker.bindPopup(
-                `<b>${pin.title || ''}</b><br>${pin.place || ''}<br>${
-                  pin.memory || ''
-                }`
-              );
-            }
+      // Helper to add markers from a collection
+      function addMarkersFromCollection(collectionName) {
+        db.collection(collectionName)
+          .get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              const pin = doc.data();
+              // Try both lat/lng and latitude/longitude field names
+              const lat = pin.lat ?? pin.latitude;
+              const lng = pin.lng ?? pin.longitude;
+              if (typeof lat === 'number' && typeof lng === 'number') {
+                const marker = L.marker([lat, lng]).addTo(map);
+                marker.bindPopup(
+                  `<b>${pin.title || ''}</b><br>${pin.place || ''}<br>${
+                    pin.memory || ''
+                  }`
+                );
+              }
+            });
           });
-        });
+      }
+      addMarkersFromCollection('memoryPins');
+      addMarkersFromCollection('pins');
     }
   }
 

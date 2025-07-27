@@ -19,7 +19,7 @@
           style="text-decoration: none; color: #f89090"
           >flashback</a
         >
-        <nav class="sidebar-menu" style="margin-top: 1.5em">
+        <nav class="sidebar-menu" style="margin-top: 1.5em; position: relative">
           <button
             type="button"
             class="sidebar-menu-item"
@@ -54,6 +54,7 @@
             gap: 0.8em;
             padding: 1.2em 1.2em 2.5em 1.2em;
             margin-bottom: 1.5em;
+            position: relative;
           "
         >
           <img
@@ -76,9 +77,74 @@
               font-size: 1.3em;
               color: #f89090;
               font-weight: bold;
+              margin-right: 0.5em;
             "
             >User</span
           >
+          <div style="position: relative; margin-left: auto">
+            <button
+              id="sidebar-menu-btn"
+              style="
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 1.5em;
+                color: #f89090;
+                padding: 0 0.2em;
+              "
+            >
+              &#8942;
+            </button>
+            <div
+              id="sidebar-menu-dropdown"
+              style="
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 2.2em;
+                background: #fff;
+                border: 1.5px solid #f89090;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px #f8909022;
+                min-width: 120px;
+              "
+            >
+              <button
+                onclick="window.location.href='settings.html'"
+                style="
+                  display: block;
+                  width: 100%;
+                  background: none;
+                  border: none;
+                  padding: 0.7em 1.2em;
+                  text-align: left;
+                  color: #f89090;
+                  font-family: 'Just Me Again Down Here', cursive;
+                  font-size: 1.1em;
+                  cursor: pointer;
+                "
+              >
+                Settings
+              </button>
+              <button
+                onclick="firebase.auth().signOut()"
+                style="
+                  display: block;
+                  width: 100%;
+                  background: none;
+                  border: none;
+                  padding: 0.7em 1.2em;
+                  text-align: left;
+                  color: #f89090;
+                  font-family: 'Just Me Again Down Here', cursive;
+                  font-size: 1.1em;
+                  cursor: pointer;
+                "
+              >
+                Log out
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
       <section class="profile-green-full">
@@ -277,29 +343,47 @@
       <a href="index.html">← Back to home</a>
     </footer>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script>
+      // 3-dot menu logic
+      document.addEventListener('DOMContentLoaded', function () {
+        var menuBtn = document.getElementById('sidebar-menu-btn');
+        var menuDropdown = document.getElementById('sidebar-menu-dropdown');
+        if (menuBtn && menuDropdown) {
+          menuBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            menuDropdown.style.display =
+              menuDropdown.style.display === 'block' ? 'none' : 'block';
+          });
+          document.addEventListener('click', function (e) {
+            if (menuDropdown.style.display === 'block') {
+              menuDropdown.style.display = 'none';
+            }
+          });
+        }
+      });
+    </script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script>
-      window.addEventListener('DOMContentLoaded', function () {
-        function setUserSidebar(user) {
-          const nameSpan = document.getElementById('sidebar-user-name');
-          const avatarImg = document.getElementById('sidebar-user-avatar');
-          if (user) {
-            nameSpan.textContent = user.displayName || user.email || 'User';
-            if (user.photoURL) {
-              avatarImg.src = user.photoURL;
-            } else {
-              const seed = encodeURIComponent(
-                user.displayName || user.email || 'ava'
-              );
-              avatarImg.src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
-            }
+      function setUserSidebar(user) {
+        const nameSpan = document.getElementById('sidebar-user-name');
+        const avatarImg = document.getElementById('sidebar-user-avatar');
+        if (user) {
+          nameSpan.textContent = user.displayName || user.email || 'User';
+          if (user.photoURL) {
+            avatarImg.src = user.photoURL;
           } else {
-            nameSpan.textContent = 'User';
-            avatarImg.src =
-              'https://api.dicebear.com/7.x/personas/svg?seed=ava';
+            const seed = encodeURIComponent(
+              user.displayName || user.email || 'ava'
+            );
+            avatarImg.src = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
           }
+        } else {
+          nameSpan.textContent = 'User';
+          avatarImg.src = 'https://api.dicebear.com/7.x/personas/svg?seed=ava';
         }
+      }
+      window.addEventListener('DOMContentLoaded', function () {
         function checkAuth() {
           if (window.firebase && firebase.auth) {
             firebase.auth().onAuthStateChanged(function (user) {
