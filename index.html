@@ -4,31 +4,222 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>flashback</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="map.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <header>
-      <div class="mascot-stamp" aria-label="mascot placeholder">🐻</div>
-      <h1>flashback</h1>
-      <p class="tagline">A letter to the places that changed us.</p>
-    </header>
-    <main>
-      <div class="cta">
-        <button id="dropPinBtn">Start your map</button>
-      </div>
-      <section class="how-it-works scrapbook-border">
-        <h2>How it works</h2>
-        <ol>
-          <li>Drop a pin on a place you love</li>
-          <li>Add a photo or memory</li>
-          <li>Share it with friends</li>
-          <li>Watch your map grow</li>
-        </ol>
+    <script>
+      if (localStorage.getItem('flashbackLoggedIn') === 'true') {
+        window.location.href = 'map.html';
+      }
+    </script>
+    <main class="main-flex">
+      <aside class="sidebar scrapbook-border">
+        <a
+          href="index.html"
+          class="flashback-cute"
+          style="text-decoration: none; color: #f89090"
+          >flashback</a
+        >
+        <nav class="sidebar-menu" style="margin-top: 1.5em">
+          <a href="map.html" style="text-decoration: none"
+            ><button type="button" class="sidebar-menu-item">Map</button></a
+          >
+          <a href="#" style="text-decoration: none"
+            ><button type="button" class="sidebar-menu-item">
+              Drop a Pin
+            </button></a
+          >
+          <a href="profile.html" style="text-decoration: none"
+            ><button type="button" class="sidebar-menu-item">Profile</button></a
+          >
+          <a href="#" style="text-decoration: none"
+            ><button type="button" class="sidebar-menu-item">
+              Settings
+            </button></a
+          >
+        </nav>
+      </aside>
+      <section
+        id="main-content"
+        class="map-section"
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 80vh;
+          background: transparent;
+          width: 100vw;
+        "
+      >
+        <div class="login-signup-box scrapbook-border">
+          <h2 class="login-title">Log In</h2>
+          <form id="loginForm">
+            <input
+              type="text"
+              id="loginUser"
+              placeholder="Username"
+              class="login-input"
+              required
+            />
+            <input
+              type="password"
+              id="loginPass"
+              placeholder="Password"
+              class="login-input"
+              required
+            />
+            <button type="submit" class="login-btn">Log In</button>
+          </form>
+          <div class="signup-switch">
+            Don't have an account?
+            <a
+              href="#"
+              id="showSignup"
+              style="color: #f89090; text-decoration: underline"
+              >Sign up</a
+            >
+          </div>
+        </div>
+        <div
+          class="login-signup-box scrapbook-border"
+          id="signupBox"
+          style="display: none"
+        >
+          <h2 class="login-title">Sign Up</h2>
+          <form id="signupForm">
+            <input
+              type="text"
+              id="signupName"
+              placeholder="Name"
+              class="login-input"
+              required
+            />
+            <input
+              type="text"
+              id="signupUser"
+              placeholder="Username"
+              class="login-input"
+              required
+            />
+            <input
+              type="password"
+              id="signupPass"
+              placeholder="Password"
+              class="login-input"
+              required
+            />
+            <button type="submit" class="login-btn">Sign Up</button>
+          </form>
+          <div class="signup-switch">
+            Already have an account?
+            <a
+              href="#"
+              id="showLogin"
+              style="color: #f89090; text-decoration: underline"
+              >Log in</a
+            >
+          </div>
+        </div>
       </section>
     </main>
     <footer>
-      <p>Start your journey — one memory at a time.</p>
+      <a href="index.html">← Back to home</a>
     </footer>
-    <script src="script.js"></script>
+    <style>
+      .login-signup-box {
+        background: #fde8e8;
+        border-radius: 18px;
+        box-shadow: 0 2px 16px 0 #f8909022;
+        padding: 2.5em 2.5em 2em 2.5em;
+        min-width: 280px;
+        max-width: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 auto 0 auto;
+      }
+      .login-title {
+        font-family: 'Just Me Again Down Here', cursive;
+        color: #f89090;
+        font-size: 2.2em;
+        margin-bottom: 0.7em;
+      }
+      .login-input {
+        width: 100%;
+        padding: 0.7em 1em;
+        margin-bottom: 1em;
+        border: 2px solid #f89090;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-family: inherit;
+        background: #fff;
+        outline: none;
+        transition: border 0.2s;
+      }
+      .login-input:focus {
+        border: 2px solid #68ab7a;
+      }
+      .login-btn {
+        background: #f89090;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 0.7em 2em;
+        font-size: 1.1em;
+        font-family: 'Just Me Again Down Here', cursive;
+        cursor: pointer;
+        margin-bottom: 0.5em;
+        transition: background 0.2s;
+      }
+      .login-btn:hover {
+        background: #68ab7a;
+      }
+      .signup-switch {
+        font-size: 1em;
+        margin-top: 0.5em;
+        color: #f89090;
+        font-family: 'Just Me Again Down Here', cursive;
+      }
+    </style>
+    <script>
+      // Login/Signup box switch logic
+      const showSignup = document.getElementById('showSignup');
+      const showLogin = document.getElementById('showLogin');
+      const loginBox = document.querySelector('.login-signup-box');
+      const signupBox = document.getElementById('signupBox');
+      if (showSignup && showLogin && loginBox && signupBox) {
+        showSignup.onclick = e => {
+          e.preventDefault();
+          loginBox.style.display = 'none';
+          signupBox.style.display = 'flex';
+        };
+        showLogin.onclick = e => {
+          e.preventDefault();
+          signupBox.style.display = 'none';
+          loginBox.style.display = 'flex';
+        };
+      }
+      // Demo login logic
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.onsubmit = function (e) {
+          e.preventDefault();
+          localStorage.setItem('flashbackLoggedIn', 'true');
+          window.location.href = 'map.html';
+        };
+      }
+      const signupForm = document.getElementById('signupForm');
+      if (signupForm) {
+        signupForm.onsubmit = function (e) {
+          e.preventDefault();
+          localStorage.setItem('flashbackLoggedIn', 'true');
+          window.location.href = 'map.html';
+        };
+      }
+    </script>
   </body>
 </html>

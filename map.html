@@ -6,20 +6,36 @@
     <title>flashback – your map</title>
     <link rel="stylesheet" href="map.css" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
     <main class="main-flex">
       <aside class="sidebar scrapbook-border">
-        <div class="flashback-cute">flashback</div>
+        <a
+          href="index.html"
+          class="flashback-cute"
+          style="text-decoration: none; color: #f89090"
+          >flashback</a
+        >
         <nav class="sidebar-menu" style="margin-top: 1.5em">
           <button type="button" class="sidebar-menu-item active">Map</button>
           <button type="button" class="sidebar-menu-item">Drop a Pin</button>
-          <button type="button" class="sidebar-menu-item">Your Letters</button>
-          <button type="button" class="sidebar-menu-item">Profile</button>
-          <button type="button" class="sidebar-menu-item">Settings</button>
+          <button
+            type="button"
+            class="sidebar-menu-item"
+            onclick="window.location.href='profile.html'"
+          >
+            Profile
+          </button>
+          <button
+            type="button"
+            class="sidebar-menu-item"
+            onclick="window.location.href='settings.html'"
+          >
+            Settings
+          </button>
         </nav>
       </aside>
       <section class="map-section">
@@ -33,6 +49,14 @@
           <button id="mapSearchBtn" title="Search">🔍</button>
         </div>
         <div id="map"></div>
+        <div class="map-topright-btns">
+          <div id="mapPinBoxTopRight" title="Drop a Pin">
+            <span class="pin-emoji">📍</span>
+          </div>
+          <div id="mapThemeBoxTopRight" title="Switch Map Theme">
+            <button id="mapThemeSwitcher" class="theme-switch-btn">🖌️</button>
+          </div>
+        </div>
       </section>
     </main>
     <footer>
@@ -48,25 +72,41 @@
     <script src="map.js"></script>
     <script>
       let map, tileLayer;
+      const mapThemes = [
+        {
+          name: 'Light',
+          url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+          attribution:
+            '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        },
+        {
+          name: 'Dark',
+          url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+          attribution:
+            '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        },
+        {
+          name: 'Vintage',
+          url: 'https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg',
+          attribution:
+            'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under ODbL.',
+        },
+      ];
+      let currentTheme = 0;
       window.onload = function () {
         if (document.getElementById('map')) {
           map = L.map('map', { zoomControl: false }).setView(
             [46.01, -111.71],
             4
           );
-          tileLayer = L.tileLayer(
-            'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-            {
-              attribution:
-                '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-              maxZoom: 19,
-              subdomains: 'abcd',
-            }
-          );
+          tileLayer = L.tileLayer(mapThemes[currentTheme].url, {
+            attribution: mapThemes[currentTheme].attribution,
+            maxZoom: 19,
+            subdomains: 'abcd',
+          });
           tileLayer.addTo(map);
-          L.control.zoom({ position: 'topright' }).addTo(map);
+          L.control.zoom({ position: 'bottomright' }).addTo(map);
           window.flashbackMap = map;
-        } else {
         }
 
         function doSearch() {
@@ -127,10 +167,20 @@
             this.classList.add('active');
           });
         });
-        const themeSelect = document.getElementById('mapThemeSelect');
-        if (themeSelect) {
-          themeSelect.addEventListener('change', function () {
-            setMapTheme(this.value);
+        // Theme switcher button logic
+        const themeBtn = document.getElementById('mapThemeSwitcher');
+        if (themeBtn) {
+          themeBtn.addEventListener('click', function () {
+            currentTheme = (currentTheme + 1) % mapThemes.length;
+            if (tileLayer) {
+              map.removeLayer(tileLayer);
+            }
+            tileLayer = L.tileLayer(mapThemes[currentTheme].url, {
+              attribution: mapThemes[currentTheme].attribution,
+              maxZoom: 19,
+              subdomains: 'abcd',
+            });
+            tileLayer.addTo(map);
           });
         }
       };
