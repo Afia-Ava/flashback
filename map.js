@@ -16,6 +16,25 @@ window.onload = function () {
       }).addTo(map);
     }
     window.flashbackMap = map;
+
+    if (window.firebase && firebase.firestore) {
+      const db = firebase.firestore();
+      db.collection('memoryPins')
+        .get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            const pin = doc.data();
+            if (typeof pin.lat === 'number' && typeof pin.lng === 'number') {
+              const marker = L.marker([pin.lat, pin.lng]).addTo(map);
+              marker.bindPopup(
+                `<b>${pin.title || ''}</b><br>${pin.place || ''}<br>${
+                  pin.memory || ''
+                }`
+              );
+            }
+          });
+        });
+    }
   }
 
   const pins = [];

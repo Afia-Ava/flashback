@@ -111,23 +111,20 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <script src="map.js"></script>
-    <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
-      // Show Firebase user info in sidebar
       window.addEventListener('DOMContentLoaded', function () {
         function setUserSidebar(user) {
           const nameSpan = document.getElementById('sidebar-user-name');
           const avatarImg = document.getElementById('sidebar-user-avatar');
           if (user) {
             nameSpan.textContent = user.displayName || user.email || 'User';
-            // Use Firebase photoURL or fallback to dicebear
             if (user.photoURL) {
               avatarImg.src = user.photoURL;
             } else {
-              // Use dicebear with seed from email or name
               const seed = encodeURIComponent(
                 user.displayName || user.email || 'ava'
               );
@@ -151,120 +148,6 @@
         checkAuth();
       });
     </script>
-    <script>
-      let map, tileLayer;
-      const mapThemes = [
-        {
-          name: 'Light',
-          url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-          attribution:
-            '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        },
-        {
-          name: 'Dark',
-          url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-          attribution:
-            '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        },
-        {
-          name: 'Vintage',
-          url: 'https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg',
-          attribution:
-            'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under ODbL.',
-        },
-      ];
-      let currentTheme = 0;
-      window.onload = function () {
-        if (document.getElementById('map')) {
-          map = L.map('map', { zoomControl: false }).setView(
-            [46.01, -111.71],
-            4
-          );
-          tileLayer = L.tileLayer(mapThemes[currentTheme].url, {
-            attribution: mapThemes[currentTheme].attribution,
-            maxZoom: 19,
-            subdomains: 'abcd',
-          });
-          tileLayer.addTo(map);
-          L.control.zoom({ position: 'bottomright' }).addTo(map);
-          window.flashbackMap = map;
-        }
-
-        function doSearch() {
-          const searchInput = document.getElementById('mapSearchInput');
-          const query = searchInput && searchInput.value.trim();
-          if (!query) {
-            alert('Please enter a search term.');
-            return;
-          }
-          if (!map) {
-            alert('Map is not initialized.');
-            return;
-          }
-
-          fetch(
-            'https://nominatim.openstreetmap.org/search?format=json&accept-language=en&q=' +
-              encodeURIComponent(query)
-          )
-            .then(response => response.json())
-            .then(results => {
-              if (results && results.length > 0) {
-                const r = results[0];
-                const lat = parseFloat(r.lat);
-                const lon = parseFloat(r.lon);
-                if (!isNaN(lat) && !isNaN(lon)) {
-                  map.setView([lat, lon], 15);
-                  if (window._searchMarker)
-                    map.removeLayer(window._searchMarker);
-                  window._searchMarker = L.marker([lat, lon]).addTo(map);
-                } else {
-                  alert(
-                    'Found result but could not determine coordinates. Full result: ' +
-                      JSON.stringify(r)
-                  );
-                }
-              } else {
-                alert(
-                  'No results found. (If you are running locally, make sure you are using a local server, not file://)'
-                );
-              }
-            })
-            .catch(error => {
-              alert('Geocoding failed: ' + error);
-            });
-        }
-        const searchInput = document.getElementById('mapSearchInput');
-        const searchBtn = document.getElementById('mapSearchBtn');
-        if (searchBtn) searchBtn.addEventListener('click', doSearch);
-        if (searchInput)
-          searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') doSearch();
-          });
-        document.querySelectorAll('.sidebar-menu-item').forEach(btn => {
-          btn.addEventListener('click', function () {
-            document
-              .querySelectorAll('.sidebar-menu-item')
-              .forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-          });
-        });
-        // Theme switcher button logic
-        const themeBtn = document.getElementById('mapThemeSwitcher');
-        if (themeBtn) {
-          themeBtn.addEventListener('click', function () {
-            currentTheme = (currentTheme + 1) % mapThemes.length;
-            if (tileLayer) {
-              map.removeLayer(tileLayer);
-            }
-            tileLayer = L.tileLayer(mapThemes[currentTheme].url, {
-              attribution: mapThemes[currentTheme].attribution,
-              maxZoom: 19,
-              subdomains: 'abcd',
-            });
-            tileLayer.addTo(map);
-          });
-        }
-      };
-    </script>
+    <script></script>
   </body>
 </html>
