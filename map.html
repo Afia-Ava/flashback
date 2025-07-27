@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>flashback – your map</title>
+    <link rel="stylesheet" href="map.css" />
+  </head>
+  <body>
+    <main class="main-flex">
+      <aside class="sidebar scrapbook-border">
+        <h2>Search & Add Pin</h2>
+        <div id="customGeocoder"></div>
+        <form id="pinForm">
+          <label
+            >Location name:<br /><input
+              type="text"
+              name="location"
+              required /></label
+          ><br />
+          <label
+            >Memory:<br /><textarea
+              name="memory"
+              rows="3"
+              required
+            ></textarea></label
+          ><br />
+          <label>Photo (URL):<br /><input type="url" name="photo" /></label
+          ><br />
+          <button type="submit">Drop Pin</button>
+        </form>
+        <section class="pins-list">
+          <h2>Your Pins</h2>
+          <ul id="pins"></ul>
+        </section>
+      </aside>
+      <section class="map-section">
+        <div id="map"></div>
+      </section>
+    </main>
+    <footer>
+      <a href="index.html">← Back to home</a>
+    </footer>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"
+    />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="map.js"></script>
+  </body>
+</html>
