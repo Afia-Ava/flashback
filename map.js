@@ -13,29 +13,35 @@ window.onload = function () {
     window.flashbackMap = map;
     window.map = map;
 
-    if (window.firebase && firebase.firestore) {
+    if (window.firebase && firebase.firestore && window.firebase.auth) {
       const db = firebase.firestore();
-      function addMarkersFromCollection(collectionName) {
-        db.collection(collectionName)
-          .get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              const pin = doc.data();
-              const lat = pin.lat ?? pin.latitude;
-              const lng = pin.lng ?? pin.longitude;
-              if (typeof lat === 'number' && typeof lng === 'number') {
-                const marker = L.marker([lat, lng]).addTo(map);
-                marker.bindPopup(
-                  `<b>${pin.title || ''}</b><br>${pin.place || ''}<br>${
-                    pin.memory || ''
-                  }`
-                );
-              }
+      // Wait for auth to be ready
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (!user) return;
+        const uid = user.uid;
+        function addMarkersFromCollection(collectionName) {
+          db.collection(collectionName)
+            .where('userId', '==', uid)
+            .get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                const pin = doc.data();
+                const lat = pin.lat ?? pin.latitude;
+                const lng = pin.lng ?? pin.longitude;
+                if (typeof lat === 'number' && typeof lng === 'number') {
+                  const marker = L.marker([lat, lng]).addTo(map);
+                  marker.bindPopup(
+                    `<b>${pin.title || ''}</b><br>${pin.place || ''}<br>${
+                      pin.memory || ''
+                    }`
+                  );
+                }
+              });
             });
-          });
-      }
-      addMarkersFromCollection('memoryPins');
-      addMarkersFromCollection('pins');
+        }
+        addMarkersFromCollection('memoryPins');
+        addMarkersFromCollection('pins');
+      });
     }
   }
 
