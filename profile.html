@@ -382,7 +382,11 @@
           user.displayName || user.email || 'ava'
         );
         const fallbackUrl = `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
-        let avatarUrl = user.photoURL || fallbackUrl;
+        let avatarUrl = user.photoURL
+          ? user.photoURL
+          : user.authPhotoURL
+          ? user.authPhotoURL
+          : fallbackUrl;
 
         function setAvatar(imgEl, url) {
           if (!imgEl) return;
@@ -554,7 +558,8 @@
               renderProfile({
                 displayName: userData.displayName || user.displayName,
                 email: user.email,
-                photoURL: userData.photoURL || user.photoURL,
+                photoURL: userData.photoURL,
+                authPhotoURL: user.photoURL,
                 username: userData.username,
                 location: userData.location,
                 about: userData.about,
