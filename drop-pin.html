@@ -9,6 +9,7 @@
       href="https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap"
       rel="stylesheet"
     />
+    <script src="cloudinary-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
   </head>
@@ -138,7 +139,6 @@
             placeholder="Place Name"
             required
           />
-        <!-- Map selection hint absolutely positioned on the right side of the green section -->
         <div style="position: absolute; top: 3.5em; right: 3.5em; max-width: 260px; background: #fffbe7; border: 2px dashed #68ab7a; border-radius: 14px; padding: 1.1em 1.3em; box-shadow: 0 2px 8px #68ab7a22; color: #68ab7a; font-family: 'Just Me Again Down Here', cursive; font-size: 1.13em; z-index: 10;">
           <span style="font-size:1.3em;vertical-align:middle;">🗺️</span>
           <span style="margin-left:0.3em;">Select a location on the map and click the <span style='font-size:1.2em;vertical-align:middle;'>📍</span> at the top right!</span>
@@ -166,7 +166,6 @@
               <div id="upload-preview-grid" style="width:100%;margin-top:0.7em;"></div>
             </div>
           </label>
-          <div id="upload-preview-grid" style="width:100%;margin-bottom:0.5em;"></div>
           <input type="date" class="cute-input" />
           <div
             style="width: 100%; display: flex; align-items: center; gap: 0.7em"
@@ -361,7 +360,8 @@
         if (form) {
           form.addEventListener('submit', function (e) {
             e.preventDefault();
-            function proceedWithSubmit(user) {
+            function proceedWithSubmit(user)
+            {
               var title = form.querySelector('input[placeholder="Title"]').value;
               var place = form.querySelector('#place-name-input').value;
               var memory = form.querySelector('textarea[placeholder="Memory"]').value;
@@ -396,28 +396,24 @@
               var uploadInput = document.getElementById('picture-upload');
               var files = uploadInput && uploadInput.files ? Array.from(uploadInput.files) : [];
               function uploadFile(file) {
-                return new Promise(function (resolve, reject) {
-                  if (window.firebase && firebase.storage) {
-                    var storageRef = firebase.storage().ref();
-                    var uniqueId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
-                    var fileRef = storageRef.child('user_uploads/' + userId + '/' + uniqueId + '_' + file.name);
-                    var uploadTask = fileRef.put(file);
-                    uploadTask.on('state_changed', null, function(error) {
-                      console.error('Upload error:', error);
-                      reject(error);
-                    }, function () {
-                      uploadTask.snapshot.ref.getDownloadURL().then(function(url) {
-                        console.log('Image uploaded, download URL:', url);
-                        resolve(url);
-                      }).catch(function(error) {
-                        console.error('GetDownloadURL error:', error);
-                        reject(error);
-                      });
+                if (typeof uploadToCloudinary === 'function') {
+                  return uploadToCloudinary(file)
+                    .then(function(url) {
+                      if (url) {
+                        console.log('Cloudinary uploaded, URL:', url);
+                        return url;
+                      } else {
+                        throw new Error('No URL returned from Cloudinary');
+                      }
+                    })
+                    .catch(function(error) {
+                      console.error('Cloudinary upload error:', error);
+                      return '';
                     });
-                  } else {
-                    resolve('');
-                  }
-                });
+                } else {
+                  alert('Cloudinary upload function not found.');
+                  return Promise.resolve('');
+                }
               }
               var uploadPromise = files && files.length > 0 ? Promise.all(files.map(uploadFile)) : Promise.resolve([]);
               uploadPromise.then(function(urls) {
