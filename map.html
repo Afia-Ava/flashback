@@ -236,20 +236,57 @@
         }
       });
       window.addEventListener('DOMContentLoaded', function () {
-        function setUserSidebar(user) {
+        async function setUserSidebar(user) {
           const nameSpan = document.getElementById('sidebar-user-name');
           const avatarImg = document.getElementById('sidebar-user-avatar');
-          if (user) {
-            nameSpan.textContent = user.displayName || user.email || 'User';
+          if (user && window.firebase && firebase.firestore) {
+            try {
+              const db = firebase.firestore();
+              const userDoc = await db
+                .collection('profileInfo')
+                .doc(user.uid)
+                .get();
+              const userData = userDoc.exists ? userDoc.data() : {};
+              let avatarUrl =
+                userData.photoURL ||
+                localStorage.getItem('flashback_profile_avatar') ||
+                'https://api.dicebear.com/7.x/personas/svg?seed=ava';
+              if (avatarImg) avatarImg.src = avatarUrl;
+              let displayName =
+                userData.displayName ||
+                user.displayName ||
+                user.email ||
+                'User';
+              if (nameSpan) nameSpan.textContent = displayName;
+            } catch (e) {
+              if (avatarImg) {
+                if (localStorage.getItem('flashback_profile_avatar')) {
+                  avatarImg.src = localStorage.getItem(
+                    'flashback_profile_avatar'
+                  );
+                } else {
+                  avatarImg.src =
+                    'https://api.dicebear.com/7.x/personas/svg?seed=ava';
+                }
+              }
+              if (nameSpan) {
+                nameSpan.textContent = user.displayName || user.email || 'User';
+              }
+            }
           } else {
-            nameSpan.textContent = 'User';
-          }
-          var savedAvatar = localStorage.getItem('flashback_profile_avatar');
-          if (avatarImg && savedAvatar) {
-            avatarImg.src = savedAvatar;
-          } else if (avatarImg) {
-            avatarImg.src =
-              'https://api.dicebear.com/7.x/personas/svg?seed=ava';
+            if (avatarImg) {
+              if (localStorage.getItem('flashback_profile_avatar')) {
+                avatarImg.src = localStorage.getItem(
+                  'flashback_profile_avatar'
+                );
+              } else {
+                avatarImg.src =
+                  'https://api.dicebear.com/7.x/personas/svg?seed=ava';
+              }
+            }
+            if (nameSpan) {
+              nameSpan.textContent = 'User';
+            }
           }
         }
         var sidebarAvatar = document.getElementById('sidebar-user-avatar');
