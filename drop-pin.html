@@ -9,6 +9,8 @@
       href="https://fonts.googleapis.com/css2?family=Just+Me+Again+Down+Here&display=swap"
       rel="stylesheet"
     />
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
   </head>
   <body>
     <main class="main-flex">
@@ -161,9 +163,10 @@
                 <span style="font-size: 1.5em; margin-right: 0.5em">📸</span>
                 <span>Upload Pictures</span>
               </label>
-              <span id="upload-file-names" class="cute-upload-filenames"></span>
+              <div id="upload-preview-grid" style="width:100%;margin-top:0.7em;"></div>
             </div>
           </label>
+          <div id="upload-preview-grid" style="width:100%;margin-bottom:0.5em;"></div>
           <input type="date" class="cute-input" />
           <div
             style="width: 100%; display: flex; align-items: center; gap: 0.7em"
@@ -358,68 +361,123 @@
         if (form) {
           form.addEventListener('submit', function (e) {
             e.preventDefault();
-            var title = form.querySelector('input[placeholder="Title"]').value;
-            var place = form.querySelector('#place-name-input').value;
-            var memory = form.querySelector(
-              'textarea[placeholder="Memory"]'
-            ).value;
-            var date = form.querySelector('input[type="date"]').value;
-            function getParam(name) {
-              const url = new URL(window.location.href);
-              return url.searchParams.get(name);
-            }
-            var lat = getParam('lat');
-            var lng = getParam('lng');
-            if (lat && lng) {
-              lat = parseFloat(lat);
-              lng = parseFloat(lng);
-            } else if (
-              localStorage.getItem('flashback_lat') &&
-              localStorage.getItem('flashback_lng')
-            ) {
-              lat = parseFloat(localStorage.getItem('flashback_lat'));
-              lng = parseFloat(localStorage.getItem('flashback_lng'));
-            } else {
-              var match = place.match(/([\-\d.]+),\s*([\-\d.]+)/);
-              if (match) {
-                lat = parseFloat(match[1]);
-                lng = parseFloat(match[2]);
+            function proceedWithSubmit(user) {
+              var title = form.querySelector('input[placeholder="Title"]').value;
+              var place = form.querySelector('#place-name-input').value;
+              var memory = form.querySelector('textarea[placeholder="Memory"]').value;
+              var date = form.querySelector('input[type="date"]').value;
+              function getParam(name) {
+                const url = new URL(window.location.href);
+                return url.searchParams.get(name);
               }
-            }
-            var userId = null;
-            if (
-              window.firebase &&
-              firebase.auth &&
-              firebase.auth().currentUser
-            ) {
-              userId = firebase.auth().currentUser.uid;
-            }
-            var pin = {
-              title,
-              place,
-              memory,
-              lat,
-              lng,
-              date: date || new Date().toISOString(),
-              userId: userId || '',
-              photoUrls: [],
-            };
-            if (window.firebase && firebase.firestore) {
-              const db = firebase.firestore();
-              Promise.all([
-                db.collection('memoryPins').add(pin),
-                db.collection('pins').add(pin)
-              ])
-                .then(function () {
-                  localStorage.removeItem('flashback_lat');
-                  localStorage.removeItem('flashback_lng');
-                  window.location.href = 'map.html';
-                })
-                .catch(function (err) {
-                  alert('Error saving pin: ' + err.message);
+              var lat = getParam('lat');
+              var lng = getParam('lng');
+              if (lat && lng) {
+                lat = parseFloat(lat);
+                lng = parseFloat(lng);
+              } else if (
+                localStorage.getItem('flashback_lat') &&
+                localStorage.getItem('flashback_lng')
+              ) {
+                lat = parseFloat(localStorage.getItem('flashback_lat'));
+                lng = parseFloat(localStorage.getItem('flashback_lng'));
+              } else {
+                var match = place.match(/([\-\d.]+),\s*([\-\d.]+)/);
+                if (match) {
+                  lat = parseFloat(match[1]);
+                  lng = parseFloat(match[2]);
+                }
+              }
+              var userId = user && user.uid ? user.uid : null;
+              if (!userId) {
+                alert('You must be logged in to upload images.');
+                return;
+              }
+              var uploadInput = document.getElementById('picture-upload');
+              var files = uploadInput && uploadInput.files ? Array.from(uploadInput.files) : [];
+              function uploadFile(file) {
+                return new Promise(function (resolve, reject) {
+                  if (window.firebase && firebase.storage) {
+                    var storageRef = firebase.storage().ref();
+                    var uniqueId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+                    var fileRef = storageRef.child('user_uploads/' + userId + '/' + uniqueId + '_' + file.name);
+                    var uploadTask = fileRef.put(file);
+                    uploadTask.on('state_changed', null, function(error) {
+                      console.error('Upload error:', error);
+                      reject(error);
+                    }, function () {
+                      uploadTask.snapshot.ref.getDownloadURL().then(function(url) {
+                        console.log('Image uploaded, download URL:', url);
+                        resolve(url);
+                      }).catch(function(error) {
+                        console.error('GetDownloadURL error:', error);
+                        reject(error);
+                      });
+                    });
+                  } else {
+                    resolve('');
+                  }
                 });
+              }
+              var uploadPromise = files && files.length > 0 ? Promise.all(files.map(uploadFile)) : Promise.resolve([]);
+              uploadPromise.then(function(urls) {
+                var photoUrls = [];
+                if (Array.isArray(urls)) {
+                  photoUrls = urls.filter(Boolean);
+                } else if (typeof urls === 'string' && urls) {
+                  photoUrls = [urls];
+                }
+                if (!Array.isArray(photoUrls)) {
+                  photoUrls = photoUrls ? [photoUrls] : [];
+                }
+                console.log('Final photoUrls to save:', photoUrls);
+                var pin = {
+                  title: title,
+                  place: place,
+                  memory: memory,
+                  lat: lat,
+                  lng: lng,
+                  date: date || new Date().toISOString(),
+                  userId: userId || '',
+                  photoUrls: photoUrls
+                };
+                if (window.firebase && firebase.firestore) {
+                  const db = firebase.firestore();
+                  db.collection('pins').add(pin)
+                    .then(function () {
+                      localStorage.removeItem('flashback_lat');
+                      localStorage.removeItem('flashback_lng');
+                      window.location.href = 'map.html';
+                    })
+                    .catch(function (err) {
+                      alert('Error saving pin: ' + err.message);
+                      console.error('Firestore save error:', err);
+                    });
+                } else {
+                  alert('Firestore not available.');
+                  console.error('Firestore not available.');
+                }
+              }).catch(function (err) {
+                alert('Error uploading images: ' + err.message);
+                console.error('Image upload error:', err);
+              });
+            }
+            if (window.firebase && firebase.auth) {
+              var currentUser = firebase.auth().currentUser;
+              if (currentUser) {
+                proceedWithSubmit(currentUser);
+              } else {
+                firebase.auth().onAuthStateChanged(function(user) {
+                  if (user) {
+                    proceedWithSubmit(user);
+                  } else {
+                    alert('You must be logged in to upload images.');
+                  }
+                });
+              }
             } else {
-              alert('Firestore not available.');
+              alert('Firebase Auth not available.');
+              console.error('Firebase Auth not available.');
             }
           });
         }
@@ -440,19 +498,47 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         var uploadInput = document.getElementById('picture-upload');
-        var fileNamesSpan = document.getElementById('upload-file-names');
-        if (uploadInput && fileNamesSpan) {
-          uploadInput.addEventListener('change', function () {
-            if (uploadInput.files.length > 0) {
-              let names = Array.from(uploadInput.files)
-                .map(f => f.name)
-                .join(', ');
-              fileNamesSpan.textContent = names;
-            } else {
-              fileNamesSpan.textContent = '';
-            }
-          });
-        }
+var uploadPreviewGrid = document.getElementById('upload-preview-grid');
+if (uploadInput && uploadPreviewGrid) {
+  uploadInput.addEventListener('change', function () {
+    uploadPreviewGrid.innerHTML = '';
+    if (uploadInput.files.length > 0) {
+      let container = document.createElement('div');
+      container.style.display = 'grid';
+      container.style.gridTemplateColumns = 'repeat(6, 1fr)';
+      container.style.gap = '0.4em';
+      container.style.width = '100%';
+      container.style.maxWidth = '100%';
+      Array.from(uploadInput.files).forEach(function(file) {
+        var reader = new FileReader();
+        var thumbBox = document.createElement('div');
+        thumbBox.style.width = '38px';
+        thumbBox.style.height = '38px';
+        thumbBox.style.display = 'flex';
+        thumbBox.style.alignItems = 'center';
+        thumbBox.style.justifyContent = 'center';
+        thumbBox.style.background = '#fff';
+        thumbBox.style.border = '2px solid #f89090';
+        thumbBox.style.borderRadius = '8px';
+        thumbBox.style.overflow = 'hidden';
+        var thumb = document.createElement('img');
+        thumb.style.width = '34px';
+        thumb.style.height = '34px';
+        thumb.style.objectFit = 'cover';
+        thumb.style.borderRadius = '6px';
+        reader.onload = function(e) {
+          thumb.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        thumbBox.appendChild(thumb);
+        container.appendChild(thumbBox);
+      });
+      uploadPreviewGrid.appendChild(container);
+    } else {
+      uploadPreviewGrid.innerHTML = '';
+    }
+  });
+}
       });
     </script>
     <script>
@@ -472,7 +558,6 @@
             avatarImg.src = 'https://api.dicebear.com/7.x/personas/svg?seed=ava';
           }
         }
-        // Force sidebar avatar to always use saved avatar from localStorage on load
         var sidebarAvatar = document.getElementById('sidebar-user-avatar');
         var savedAvatar = localStorage.getItem('flashback_profile_avatar');
         if (sidebarAvatar && savedAvatar) {

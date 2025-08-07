@@ -413,11 +413,11 @@
               />
             </label>
             <label style="font-size: 1.1em; color: #7a5c2e; text-align: left"
-              >Username
+              >Email
               <input
                 type="text"
-                id="profile-username"
-                placeholder="Username"
+                id="profile-email"
+                placeholder="Email"
                 style="
                   width: 100%;
                   padding: 0.7em;
@@ -430,6 +430,7 @@
                   font-family: 'Just Me Again Down Here', cursive;
                   color: #7a5c2e;
                 "
+                readonly
               />
             </label>
             <label style="font-size: 1.1em; color: #7a5c2e; text-align: left"
@@ -542,14 +543,12 @@
         var saveBtn = document.getElementById('save-profile-btn');
         if (saveBtn) {
           saveBtn.addEventListener('click', async function () {
-            var name = document.getElementById('profile-name').value.trim();
-            var username = document
-              .getElementById('profile-username')
-              .value.trim();
-            var about = document.getElementById('profile-about').value.trim();
-            var location = document
-              .getElementById('profile-location')
-              .value.trim();
+            var nameInput = document.getElementById('profile-name');
+            var aboutInput = document.getElementById('profile-about');
+            var locationInput = document.getElementById('profile-location');
+            var name = nameInput.value.trim();
+            var about = aboutInput.value.trim();
+            var location = locationInput.value.trim();
             var photoURL = document.getElementById('profile-avatar').src;
             if (!window.firebase || !firebase.auth().currentUser) {
               alert('You must be logged in to save your profile.');
@@ -561,14 +560,34 @@
               await db.collection('profileInfo').doc(uid).set(
                 {
                   displayName: name,
-                  username: username,
                   about: about,
                   location: location,
                   photoURL: photoURL,
                 },
                 { merge: true }
               );
-              window.location.href = 'profile.html';
+              nameInput.value = '';
+              aboutInput.value = '';
+              locationInput.value = '';
+              setTimeout(async function () {
+                var doc = await db.collection('profileInfo').doc(uid).get();
+                if (doc.exists) {
+                  var data = doc.data();
+                  nameInput.value = data.displayName || '';
+                  aboutInput.value = data.about || '';
+                  locationInput.value = data.location || '';
+                  if (data.photoURL) {
+                    document.getElementById('profile-avatar').src =
+                      data.photoURL;
+                  }
+                }
+                // Always set email from user object
+                var user = firebase.auth().currentUser;
+                if (user) {
+                  document.getElementById('profile-email').value =
+                    user.email || '';
+                }
+              }, 300);
             } catch (e) {
               alert('Error saving profile: ' + e.message);
             }
@@ -596,10 +615,37 @@
         if (sidebarAvatar && savedAvatar) {
           sidebarAvatar.src = savedAvatar;
         }
+
+        function loadProfileInfo(user) {
+          if (!user) return;
+          var db = window.firebase.firestore();
+          db.collection('profileInfo')
+            .doc(user.uid)
+            .get()
+            .then(function (doc) {
+              if (doc.exists) {
+                var data = doc.data();
+                document.getElementById('profile-name').value =
+                  data.displayName || '';
+                document.getElementById('profile-about').value =
+                  data.about || '';
+                document.getElementById('profile-location').value =
+                  data.location || '';
+                if (data.photoURL) {
+                  document.getElementById('profile-avatar').src = data.photoURL;
+                  if (sidebarAvatar) sidebarAvatar.src = data.photoURL;
+                }
+              }
+              // Always set email from user object
+              document.getElementById('profile-email').value = user.email || '';
+            });
+        }
+
         function checkAuth() {
           if (window.firebase && firebase.auth) {
             firebase.auth().onAuthStateChanged(function (user) {
               setUserSidebar(user);
+              loadProfileInfo(user);
             });
           } else {
             setTimeout(checkAuth, 100);
