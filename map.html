@@ -257,10 +257,45 @@
         if (sidebarAvatar && savedAvatar) {
           sidebarAvatar.src = savedAvatar;
         }
+
+        async function renderUserPinsOnMap(user) {
+          if (!user) return;
+          try {
+            const db = firebase.firestore();
+            const pinsSnap = await db
+              .collection('pins')
+              .where('userId', '==', user.uid)
+              .get();
+            if (window.map && window._userPinsLayer) {
+              window.map.removeLayer(window._userPinsLayer);
+            }
+            if (window.map && typeof L !== 'undefined') {
+              const pinsLayer = L.layerGroup();
+              pinsSnap.forEach(doc => {
+                const pin = doc.data();
+                if (pin.lat && pin.lng) {
+                  const marker = L.marker([pin.lat, pin.lng]);
+                  marker.bindPopup(
+                    `<b>${pin.title || 'Untitled Pin'}</b><br>${
+                      pin.place || ''
+                    }`
+                  );
+                  pinsLayer.addLayer(marker);
+                }
+              });
+              pinsLayer.addTo(window.map);
+              window._userPinsLayer = pinsLayer;
+            }
+          } catch (e) {
+            console.error('Error loading user pins:', e);
+          }
+        }
+
         function checkAuth() {
           if (window.firebase && firebase.auth) {
             firebase.auth().onAuthStateChanged(function (user) {
               setUserSidebar(user);
+              renderUserPinsOnMap(user);
             });
           } else {
             setTimeout(checkAuth, 100);

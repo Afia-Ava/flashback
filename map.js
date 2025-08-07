@@ -13,36 +13,42 @@ window.onload = function () {
     window.flashbackMap = map;
     window.map = map;
 
-    if (window.firebase && firebase.firestore) {
-      const db = firebase.firestore();
-      console.log('[flashback] Fetching pins from Firestore...');
-      db.collection('pins')
-        .get()
-        .then(snapshot => {
-          console.log(`[flashback] Pins fetched: ${snapshot.size}`);
-          if (snapshot.empty) {
-            console.warn('[flashback] No pins found in Firestore.');
-          }
-          snapshot.forEach(doc => {
-            const pin = doc.data();
-            console.log('[flashback] Pin data:', pin);
-            const lat = pin.lat ?? pin.latitude;
-            const lng = pin.lng ?? pin.longitude;
-            if (typeof lat === 'number' && typeof lng === 'number') {
-              const marker = L.marker([lat, lng]).addTo(map);
-              marker.bindPopup(
-                `<b>${pin.title || ''}</b><br>${pin.place || ''}<br>${
-                  pin.memory || ''
-                }`
+    // Only show pins for the logged-in user
+    if (window.firebase && firebase.firestore && firebase.auth) {
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (!user) return;
+        const db = firebase.firestore();
+        db.collection('pins')
+          .where('userId', '==', user.uid)
+          .get()
+          .then(snapshot => {
+            console.log(`[flashback] User pins fetched: ${snapshot.size}`);
+            if (snapshot.empty) {
+              console.warn(
+                '[flashback] No pins found in Firestore for this user.'
               );
-            } else {
-              console.warn('[flashback] Pin missing lat/lng:', pin);
             }
+            snapshot.forEach(doc => {
+              const pin = doc.data();
+              console.log('[flashback] Pin data:', pin);
+              const lat = pin.lat ?? pin.latitude;
+              const lng = pin.lng ?? pin.longitude;
+              if (typeof lat === 'number' && typeof lng === 'number') {
+                const marker = L.marker([lat, lng]).addTo(map);
+                marker.bindPopup(
+                  `<b>${pin.title || ''}</b><br>${pin.place || ''}<br>${
+                    pin.memory || ''
+                  }`
+                );
+              } else {
+                console.warn('[flashback] Pin missing lat/lng:', pin);
+              }
+            });
+          })
+          .catch(err => {
+            console.error('[flashback] Error fetching user pins:', err);
           });
-        })
-        .catch(err => {
-          console.error('[flashback] Error fetching pins:', err);
-        });
+      });
     }
   }
 
