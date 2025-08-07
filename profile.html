@@ -418,7 +418,7 @@
             const db = firebase.firestore();
             const pinsSnap = await db
               .collection('pins')
-              .where('userId', '==', user.uid) 
+              .where('userId', '==', user.uid)
               .orderBy('date', 'desc')
               .get();
             console.log('[flashback] Current user.uid:', user.uid);
