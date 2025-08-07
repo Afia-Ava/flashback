@@ -45,7 +45,6 @@
             Settings
           </button>
         </nav>
-        <div style="flex: 1"></div>
         <div
           id="sidebar-user-profile"
           style="
@@ -54,6 +53,7 @@
             gap: 0.8em;
             padding: 1.2em 1.2em 2.5em 1.2em;
             margin-bottom: 1.5em;
+            margin-top: 100px;
             position: relative;
           "
         >
@@ -132,33 +132,27 @@
       </aside>
       <section
         class="profile-green-full"
-        style="
-          min-height: 100vh;
-          max-height: 100vh;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-        "
+        id="profile-section"
+        style="padding-top: 2.5em"
       >
         <div
           style="
-            margin-top: 2.5em;
             margin-left: 2.5em;
+            max-width: 900px;
+            width: 100%;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            gap: 1.2em;
-            min-width: 340px;
-            max-width: 420px;
-            margin-bottom: 0;
-            padding: 0;
-            background: none;
-            box-shadow: none;
-            border: none;
           "
         >
-          <div style="display: flex; align-items: center; gap: 1.2em">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 1.2em;
+              margin-bottom: 0.5em;
+            "
+          >
             <img
               id="profile-avatar"
               src="https://api.dicebear.com/7.x/personas/svg?seed=ava"
@@ -190,7 +184,6 @@
                 "
                 >Name</span
               >
-              <!-- Username removed as per new requirements -->
               <span
                 id="profile-about"
                 style="
@@ -211,19 +204,19 @@
               >
             </div>
           </div>
+          <div
+            id="profile-pins-list"
+            style="
+              width: 100%;
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 1.5em;
+              margin-bottom: 4em;
+              margin-top: 2.5em;
+              min-height: 200px;
+            "
+          ></div>
         </div>
-        <div
-          id="profile-pins-list"
-          style="
-            margin-left: 2.5em;
-            margin-top: 1.5em;
-            max-width: 900px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5em;
-            margin-bottom: 4em;
-          "
-        ></div>
         <div
           id="pin-modal-overlay"
           style="
@@ -330,6 +323,20 @@
     <script src="firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+
+      function forceScrollToTop() {
+        window.scrollTo(0, 0);
+        setTimeout(() => window.scrollTo(0, 0), 100);
+        setTimeout(() => window.scrollTo(0, 0), 300);
+        setTimeout(() => window.scrollTo(0, 0), 600);
+      }
+      window.addEventListener('load', forceScrollToTop);
+      window.addEventListener('pageshow', forceScrollToTop);
+      document.addEventListener('DOMContentLoaded', forceScrollToTop);
+
       document.addEventListener('DOMContentLoaded', function () {
         var menuBtn = document.getElementById('sidebar-menu-btn');
         var menuDropdown = document.getElementById('sidebar-menu-dropdown');
@@ -428,6 +435,7 @@
             if (pinsSnap.empty) {
               pinsList.innerHTML =
                 '<span style="color:#7a5c2e;font-family:Just Me Again Down Here,cursive;font-size:1.1em;">No pins yet. Drop a pin on the map!</span>';
+              forceScrollToTop();
               return;
             }
             let html = '';
@@ -450,6 +458,9 @@
               </div>`;
             });
             pinsList.innerHTML = html;
+
+            forceScrollToTop();
+
             document.querySelectorAll('.pin-card').forEach(card => {
               card.addEventListener('click', async function () {
                 const pinId = card.getAttribute('data-pin-id');
@@ -520,6 +531,7 @@
             };
           } catch (e) {
             pinsList.innerHTML = `<span style=\"color:#f00;\">Error loading pins: ${e.message}</span>`;
+            forceScrollToTop();
           }
         }
         function checkAuth() {
