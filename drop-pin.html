@@ -395,38 +395,44 @@
               }
               var uploadInput = document.getElementById('picture-upload');
               var files = uploadInput && uploadInput.files ? Array.from(uploadInput.files) : [];
-              function uploadFile(file) {
-                if (typeof uploadToCloudinary === 'function') {
-                  return uploadToCloudinary(file)
-                    .then(function(url) {
-                      if (url) {
-                        console.log('Cloudinary uploaded, URL:', url);
-                        return url;
-                      } else {
-                        throw new Error('No URL returned from Cloudinary');
-                      }
-                    })
-                    .catch(function(error) {
-                      console.error('Cloudinary upload error:', error);
-                      return '';
-                    });
-                } else {
-                  alert('Cloudinary upload function not found.');
-                  return Promise.resolve('');
-                }
+              console.log('[DEBUG] Files to upload:', files);
+              if (!window.uploadToCloudinary || typeof uploadToCloudinary !== 'function') {
+                alert('Cloudinary upload function not found. Please check cloudinary-config.js is loaded.');
+                console.error('[DEBUG] Cloudinary upload function not found.');
+                return;
               }
-              var uploadPromise = files && files.length > 0 ? Promise.all(files.map(uploadFile)) : Promise.resolve([]);
-              uploadPromise.then(function(urls) {
-                var photoUrls = [];
-                if (Array.isArray(urls)) {
-                  photoUrls = urls.filter(Boolean);
-                } else if (typeof urls === 'string' && urls) {
-                  photoUrls = [urls];
+              if (!files.length) {
+                alert('No files selected for upload. Please choose at least one image.');
+                console.error('[DEBUG] No files selected for upload.');
+                return;
+              }
+              function uploadFile(file) {
+                console.log('[DEBUG] Uploading file to Cloudinary:', file);
+                return uploadToCloudinary(file)
+                  .then(function(url) {
+                    if (url) {
+                      console.log('[DEBUG] Cloudinary uploaded, URL:', url);
+                      return url;
+                    } else {
+                      alert('No URL returned from Cloudinary for file: ' + file.name);
+                      console.error('[DEBUG] No URL returned from Cloudinary for file:', file);
+                      throw new Error('No URL returned from Cloudinary');
+                    }
+                  })
+                  .catch(function(error) {
+                    alert('Cloudinary upload error for file ' + file.name + ': ' + error.message);
+                    console.error('[DEBUG] Cloudinary upload error:', error, file);
+                    return '';
+                  });
+              }
+              Promise.all(files.map(uploadFile)).then(function(urls) {
+                console.log('[DEBUG] Upload results:', urls);
+                var photoUrls = Array.isArray(urls) ? urls.filter(Boolean) : (typeof urls === 'string' && urls ? [urls] : []);
+                if (!photoUrls.length) {
+                  alert('No images were uploaded successfully. Pin will be saved without images.');
+                  console.warn('[DEBUG] No photoUrls to save.');
                 }
-                if (!Array.isArray(photoUrls)) {
-                  photoUrls = photoUrls ? [photoUrls] : [];
-                }
-                console.log('Final photoUrls to save:', photoUrls);
+                console.log('[DEBUG] Final photoUrls to save:', photoUrls);
                 var pin = {
                   title: title,
                   place: place,
@@ -437,25 +443,27 @@
                   userId: userId || '',
                   photoUrls: photoUrls
                 };
+                console.log('[DEBUG] Pin object to save:', pin);
                 if (window.firebase && firebase.firestore) {
                   const db = firebase.firestore();
                   db.collection('pins').add(pin)
                     .then(function () {
+                      console.log('[DEBUG] Pin saved to Firestore successfully.');
                       localStorage.removeItem('flashback_lat');
                       localStorage.removeItem('flashback_lng');
                       window.location.href = 'map.html';
                     })
                     .catch(function (err) {
                       alert('Error saving pin: ' + err.message);
-                      console.error('Firestore save error:', err);
+                      console.error('[DEBUG] Firestore save error:', err);
                     });
                 } else {
                   alert('Firestore not available.');
-                  console.error('Firestore not available.');
+                  console.error('[DEBUG] Firestore not available.');
                 }
               }).catch(function (err) {
                 alert('Error uploading images: ' + err.message);
-                console.error('Image upload error:', err);
+                console.error('[DEBUG] Image upload error:', err);
               });
             }
             if (window.firebase && firebase.auth) {

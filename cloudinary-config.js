@@ -1,9 +1,9 @@
 function uploadToCloudinary(file) {
   return new Promise(function (resolve, reject) {
-    const url = 'https://api.cloudinary.com/v1_1/dsflmbhkh/upload';
+    const url = 'https://api.cloudinary.com/v1_1/dsf1mbhkh/upload';
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'Flashback');
+    formData.append('upload_preset', 'flashback_app');
     fetch(url, {
       method: 'POST',
       body: formData,

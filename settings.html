@@ -581,7 +581,6 @@
                       data.photoURL;
                   }
                 }
-                // Always set email from user object
                 var user = firebase.auth().currentUser;
                 if (user) {
                   document.getElementById('profile-email').value =
@@ -636,7 +635,7 @@
                   if (sidebarAvatar) sidebarAvatar.src = data.photoURL;
                 }
               }
-              // Always set email from user object
+
               document.getElementById('profile-email').value = user.email || '';
             });
         }

@@ -48,7 +48,6 @@
   </head>
   <body>
     <script>
-      // On load, check if user is logged in; if so, redirect to map.html
       document.addEventListener('DOMContentLoaded', function () {
         if (window.firebase && firebase.auth) {
           firebase.auth().onAuthStateChanged(function (user) {
