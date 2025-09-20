@@ -18,3 +18,4 @@ To create an app that feels both human and true to ourselves, we hand drew all o
 love, 
 afia ava + kai ling 💌
 
+[![Athena Award Badge](https://img.shields.io/endpoint?url=https%3A%2F%2Faward.athena.hackclub.com%2Fapi%2Fbadge)](https://award.athena.hackclub.com?utm_source=readme)
